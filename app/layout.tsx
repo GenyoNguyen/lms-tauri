@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
+import { ToastProvider } from "@/components/providers/toaster-provider";
+
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "./api/uploadthing/core";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -24,12 +30,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <NextSSRPlugin
+            routerConfig={extractRouterConfig(ourFileRouter)}
+          />
+          <ToastProvider/>
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
+
   );
 }
