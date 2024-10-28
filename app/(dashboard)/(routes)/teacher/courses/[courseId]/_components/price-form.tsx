@@ -99,7 +99,7 @@ export const PriceForm = ({
                                     <FormControl>
                                         <Input
                                             type="number"
-                                            step="0.01"
+                                            step="10000"
                                             disabled={isSubmitting}
                                             placeholder="Set a price for your course"
                                             {...field}
