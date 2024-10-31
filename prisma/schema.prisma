@@ -118,9 +118,9 @@ model Purchase {
 }
 
 model StripeCustomer {
-  id             String @id @default(uuid())
-  userId         String @unique
-  stripeCustomer String @unique
+  id               String @id @default(uuid())
+  userId           String @unique
+  stripeCustomerId String @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
