@@ -51,7 +51,7 @@ export const getCourses = async ({
         });
 
         const coursesWithProgress: CourseWithProgressWithCategory[] = await Promise.all(
-            courses.map(async course => {
+            courses.map(async (course: any) => {
                 if (course.purchases.length === 0) {
                     return {
                         ...course,

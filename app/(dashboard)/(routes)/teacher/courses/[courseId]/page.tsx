@@ -61,7 +61,7 @@ const CourseIdPage = async ({
         course.imageUrl,
         course.price,
         course.categoryId,
-        course.chapters.some(chapter => chapter.isPublished),
+        course.chapters.some((chapter: { isPublished: any; }) => chapter.isPublished),
     ]
 
     const totalFields = requiredFields.length;
@@ -117,7 +117,7 @@ const CourseIdPage = async ({
                         <CategoryForm
                             initialData={course}
                             courseId={course.id}
-                            options={categories.map((category: { name: unknown; id: unknown; }) => ({
+                            options={categories.map((category: { name: string; id: string; }) => ({
                                 label: category.name,
                                 value: category.id,
                             }))}
