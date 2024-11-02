@@ -1,6 +1,6 @@
 import { IconBadge } from "@/components/icon-badgs";
 import { db } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+
 import { ArrowLeft, Eye, LayoutDashboard, Video } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -16,7 +16,8 @@ const ChapterIdPage = async ({
 }: {
     params: { courseId: string, chapterId: string }
 }) => {
-    const { userId } = auth();
+    // const { userId } = auth();
+const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     
     if (!userId) {
         return redirect("/");
@@ -139,3 +140,9 @@ const ChapterIdPage = async ({
 }
  
 export default ChapterIdPage;
+
+export const dynamic = 'force-static';
+
+export async function generateStaticParams() {
+    return [];
+}

@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 import { getAnalytics } from "@/actions/get-analytics";
@@ -6,7 +5,8 @@ import { DataCard } from "./_components/data-card";
 import { Chart } from "./_components/chart";
 
 const AnalyticsPage = async () => {
-    const { userId } = auth();
+    // const { userId } = auth();
+const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
 
     if (!userId) {
         return redirect("/");

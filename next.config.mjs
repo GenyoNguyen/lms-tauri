@@ -1,14 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // output: 'export',
+    output: 'export',
     images: {
-        remotePatterns: [
-            {
-                protocol: "https",
-                hostname: "utfs.io"
-            }
-        ]
-    }
+        unoptimized: true
+    },
+    swcMinify: true,
 };
 
 export default nextConfig;

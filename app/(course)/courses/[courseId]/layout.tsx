@@ -1,6 +1,5 @@
 import { getProgress } from "@/actions/get-progress";
 import { db } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { CourseSidebar } from "./_components/course-sidebar";
 import { CourseNavbar } from "./_components/course-navbar";
@@ -12,7 +11,8 @@ const CourseLayout = async ({
     children: React.ReactNode;
     params: { courseId: string };
 }) => {
-    const { userId } = auth();
+    // const { isSignedIn, user } = useUser();
+    const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     
     if(!userId) {
         return redirect("/");

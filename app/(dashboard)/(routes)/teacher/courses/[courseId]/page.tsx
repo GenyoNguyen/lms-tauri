@@ -1,6 +1,6 @@
 import { IconBadge } from "@/components/icon-badgs";
 import { db } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+
 import { CircleDollarSign, File, LayoutDashboard, ListChecks } from "lucide-react";
 import { redirect } from "next/navigation";
 import { TitleForm } from "./_components/title-form";
@@ -18,7 +18,8 @@ const CourseIdPage = async ({
 }: {
     params: { courseId: string}
 }) => {
-    const { userId } = auth();
+    // const { userId } = auth();
+const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
 
     if (!userId) {
         return redirect("/");
@@ -168,3 +169,9 @@ const CourseIdPage = async ({
 }
  
 export default CourseIdPage;
+
+export const dynamic = 'force-static';
+
+export async function generateStaticParams() {
+    return [];
+}

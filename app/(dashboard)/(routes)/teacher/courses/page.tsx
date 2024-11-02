@@ -1,11 +1,12 @@
 import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
-import { auth } from "@clerk/nextjs/server";
+
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 
 const CoursesPage = async () => {
-    const { userId } = auth();
+    // const { userId } = auth();
+const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
 
     if (!userId) {
         return redirect("/");

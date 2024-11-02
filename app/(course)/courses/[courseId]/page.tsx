@@ -31,3 +31,19 @@ const CourseIdPage = async ({
 }
  
 export default CourseIdPage;
+
+export const dynamic = 'force-static';
+
+export async function generateStaticParams() {
+    const courseIds = await db.course.findMany({
+        select: {
+            id: true
+        }
+    })
+
+    return courseIds.map(courseId => {
+        return{
+            courseId: courseId.id
+        }
+    });
+}

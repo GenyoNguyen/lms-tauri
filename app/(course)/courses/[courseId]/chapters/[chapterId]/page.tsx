@@ -1,6 +1,6 @@
 import { getChapter } from "@/actions/get-chapter";
 import { Banner } from "@/components/banner";
-import { auth } from "@clerk/nextjs/server";
+
 import { redirect } from "next/navigation";
 import { VideoPlayer } from "./_components/video-player";
 import { CourseEnrollButton } from "./_components/course-enroll-button";
@@ -8,13 +8,15 @@ import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
 import { File } from "lucide-react";
 import { CourseProgressButton } from "./_components/course-progress-button";
+import { db } from "@/lib/db";
 
 const ChapterIdPage = async ({
     params
 }: {
     params: { courseId: string; chapterId: string }
 }) => {
-    const { userId } = auth();
+    // const { userId } = auth();
+const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     if (!userId) {
         return redirect("/");
     }
@@ -116,3 +118,36 @@ const ChapterIdPage = async ({
 }
  
 export default ChapterIdPage;
+
+export const dynamic = 'force-static';
+
+export async function generateStaticParams() {
+    const courses = await db.course.findMany({
+        select: {
+            id: true
+        }
+    });
+
+    const nestedPaths = await Promise.all(courses.map(async course => {
+        const chapters = await db.chapter.findMany({
+            where: {
+                courseId: course.id
+            },
+            select: {
+                courseId: true,
+                id: true
+            }
+        })
+        
+        const res = chapters.map( chapter => {
+            return {
+                courseId: chapter.courseId,
+                chapterId: chapter.id
+            }
+        })
+        return res
+    }));
+
+    const paths = nestedPaths.reduce((accumulator, value) => accumulator.concat(value), []);
+    return paths;
+}

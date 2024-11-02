@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+
 import { Chapter, Course, UserProgress } from "@prisma/client"
 import { redirect } from "next/navigation";
 import { CourseSidebarItem } from "./course-sidebar-item";
@@ -18,7 +18,8 @@ export const CourseSidebar = async ({
     course,
     progressCount
 }: CourseSidebarProps) => {
-    const { userId } = auth();
+    // // const { userId } = auth();
+    const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
 
     if (!userId) {
         return redirect("/");

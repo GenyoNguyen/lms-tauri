@@ -1,21 +1,26 @@
-import { getDashboardCourses } from "@/actions/get-dashboard-courses";
+"use client";
+
 import { CoursesList } from "@/components/courses-list";
-import { auth } from "@clerk/nextjs/server";
-import { CheckCircle, Clock } from "lucide-react";
-import { redirect } from "next/navigation";
+
+import { CheckCircle, Clock, Loader2 } from "lucide-react";
 import { InfoCard } from "./_components/info-card";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
-export default async function Dashboard() {
-  const { userId } = auth();
+export default function Dashboard() {
+  const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2"
 
-  if (!userId) {
-    return redirect("/");
-  }
+  const [{ coursesInProgress, completedCourses }, setDashboardCourses] = useState({ coursesInProgress: [], completedCourses: [] });
+  const [isLoading, setIsLoading] = useState(true);
 
-  const {
-    completedCourses,
-    coursesInProgress
-  } = await getDashboardCourses(userId);
+  useEffect(() => {
+    async function fetchDashboardCourses() {
+      const dashboardCourses = await axios.post("/api/dashboard", { userId: userId });
+      setDashboardCourses(dashboardCourses.data);
+      setIsLoading(false);
+    }
+    fetchDashboardCourses();
+  }, []);
 
   return (
     <div className="p-6 space-y-4">
@@ -32,9 +37,17 @@ export default async function Dashboard() {
           variant="success"
         />
       </div>
-      <CoursesList
-        items={[...coursesInProgress, ...completedCourses]}
-      />
+      {isLoading ? (
+        <div className="mt-10 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      ) : (
+        <CoursesList
+          items={[...coursesInProgress, ...completedCourses]}
+        />
+      )}
     </div>
   );
 }
+
+export const dynamic = "force-static";
