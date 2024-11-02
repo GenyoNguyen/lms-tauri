@@ -1,9 +1,5 @@
-const Chatbot = () => {
-    return ( 
-        <div>
-            Chatbot
-        </div>
-     );
+import ChatbotClient from './ChatbotClient';
+
+export default function ChatbotPage() {
+  return <ChatbotClient />;
 }
- 
-export default Chatbot;
