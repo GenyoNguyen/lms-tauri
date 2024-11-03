@@ -5,6 +5,9 @@ const nextConfig = {
         unoptimized: true
     },
     swcMinify: true,
+    experimental: {
+        missingSuspenseWithCSRBailout: false
+    }
 };
 
 export default nextConfig;

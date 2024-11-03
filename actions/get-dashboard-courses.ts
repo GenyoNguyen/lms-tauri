@@ -45,8 +45,8 @@ export const getDashboardCourses = async (userId: string): Promise<DashboardCour
         const coursesInProgress = courses.filter((course) => (course.progress ?? 0) < 100);
 
         return {
-            completedCourses,
-            coursesInProgress
+            completedCourses: completedCourses ? completedCourses : [],
+            coursesInProgress: coursesInProgress ? coursesInProgress : []
         }
     } catch (error) {
         console.log("[GET_DASHBOARD_COURSES]", error);

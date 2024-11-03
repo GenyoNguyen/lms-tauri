@@ -8,6 +8,7 @@ import { redirect, useSearchParams } from "next/navigation";
 import { CoursesList } from "@/components/courses-list";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Loader2 } from "lucide-react";
 
 // interface SearchPageProps {
 //     searchParams: {
@@ -45,19 +46,25 @@ const SearchPage = () => {
         return redirect("/");
     }
 
-    return ( 
-        <>
-            <div className="px-6 pt-6 md:hidden md:mb-0 block">
-                <SearchInput />
-            </div>
-            <div className="p-6 space-y-4">
-                <Categories
-                    items={categories}
-                />
-                <CoursesList items={courses} />
-            </div>
-        </>
-     );
+    if(courses) {
+        return ( 
+            <>
+                <div className="px-6 pt-6 md:hidden md:mb-0 block">
+                    <SearchInput />
+                </div>
+                <div className="p-6 space-y-4">
+                    <Categories
+                        items={categories}
+                    />
+                    <CoursesList items={courses} />
+                </div>
+            </>
+        );
+    } else {
+        return (
+            <Loader2 className="w-8 h-8 animate-spin"/>
+        )
+    }
 }
  
 export default SearchPage;

@@ -24,8 +24,10 @@ export const CourseCard = ({
     progress,
     category
 }: CourseCardProps) => {
+    const searchParams = new URLSearchParams();
+    searchParams.set("courseId", id);
     return (
-        <Link href={`/courses/${id}`}>
+        <Link href={`/courses/?${searchParams.toString()}`}>
             <div className="group hover:shadow-sm transition overflow-hidden border rounded-lg p-3 h-full">
                 <div className="relative w-full aspect-video rounded-md overflow-hidden">
                     <Image

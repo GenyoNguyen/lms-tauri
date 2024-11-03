@@ -10,7 +10,6 @@ const InstructionContent = () => {
   const [fontClass, setFontClass] = useState('font-sans'); // Default font class
   const [selectedColor, setSelectedColor] = useState('purple');
   const [ripples, setRipples] = useState<Array<{ x: number; y: number; id: number; color: string }>>([]);
-  const [clickCount, setClickCount] = useState(0);
 
   const getRandomColor = () => {
     const colors = [
@@ -30,7 +29,6 @@ const InstructionContent = () => {
 
     const color = getRandomColor();
     setRipples(prev => [...prev, { x, y, id: Date.now(), color }]);
-    setClickCount(prev => prev + 1);
   };
 
   useEffect(() => {
@@ -220,7 +218,7 @@ const InstructionContent = () => {
                 <p className="mt-2 text-gray-600">
                   • Sử dụng câu ngắn gọn đúng chủ đề muốn giải đáp, rõ ràng để chat hiệu quả.<br/>
                   • Chia nhỏ vấn đề để chatbot có thể đáp ứng tốt hơn.<br/>
-                  • Nhấn nút "Gợi ý" để xem các câu hỏi mẫu.
+                  • Nhấn nút &quot;Gợi ý&quot; để xem các câu hỏi mẫu.
                 </p>
               </div>
             </div>
@@ -228,7 +226,7 @@ const InstructionContent = () => {
 
           <div className="text-center mt-8 p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg transform hover:scale-105 transition-all duration-300">
             <p className="text-gray-600 italic">
-              "Hãy trải nghiệm và tận hưởng cuộc trò chuyện thú vị với Chatbot nhé! 🎉"
+              Hãy trải nghiệm và tận hưởng cuộc trò chuyện thú vị với Chatbot nhé! 🎉
             </p>
           </div>
         </CardContent>

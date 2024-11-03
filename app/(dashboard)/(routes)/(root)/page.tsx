@@ -22,32 +22,36 @@ export default function Dashboard() {
     fetchDashboardCourses();
   }, []);
 
-  return (
-    <div className="p-6 space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <InfoCard
-          icon={Clock}
-          label="In progress"
-          numberOfItems={coursesInProgress.length}
-        />
-        <InfoCard
-          icon={CheckCircle}
-          label="Completed"
-          numberOfItems={completedCourses.length}
-          variant="success"
-        />
-      </div>
-      {isLoading ? (
-        <div className="mt-10 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
+  if (coursesInProgress && completedCourses) {
+    return (
+      <div className="p-6 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <InfoCard
+            icon={Clock}
+            label="In progress"
+            numberOfItems={coursesInProgress.length}
+          />
+          <InfoCard
+            icon={CheckCircle}
+            label="Completed"
+            numberOfItems={completedCourses.length}
+            variant="success"
+          />
         </div>
-      ) : (
-        <CoursesList
-          items={[...coursesInProgress, ...completedCourses]}
-        />
-      )}
-    </div>
-  );
+        {isLoading ? (
+          <div className="mt-10 items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : (
+          <CoursesList
+            items={[...coursesInProgress, ...completedCourses]}
+          />
+        )}
+      </div>
+    );
+  } else {
+    return (
+      <Loader2 className="w-8 h-8 animate-spin"/>
+    )
+  }
 }
-
-export const dynamic = "force-static";
