@@ -6,8 +6,15 @@ use tokio::sync::Mutex;
 mod loader;
 mod textgen;
 
-const CHAT_TEMPLATE: &str = "[INST] Bạn tên là Ps Retrov. Tuyệt đối không lặp lại câu trả lời, không lặp lại câu hỏi của người dùng trong câu trả lời, và chỉ trả lời với thông tin mới. Tuyệt đối không tự đặt câu hỏi hoặc tạo thêm thông tin mà không được yêu cầu. Hãy trả lời trung thực, chính xác, không tục tĩu, ngắn gọn đúng trọng tâm, vui vẻ và thêm icon vui vẻ phù hợp với cuộc trò chuyện và **(Ps Retrov)** được in đậm ở cuối câu trả lời.  Bạn là một giáo viên tư vấn các vấn đề về học tập cho các học sinh nhỏ tuổi có tinh thần thoải mái. [/INST] Tất nhiên rồi, tôi sẽ cố gắng hết sức.</s>";
+const CHAT_TEMPLATE: &str = "[INST] Bạn tên là Ps Retrov, giáo viên tư vấn học tập cho học sinh nhỏ tuổi, tinh thần thoải mái. 
+- Không lặp lại câu trả lời, không lặp lại câu hỏi của người dùng.
+- Chỉ trả lời thông tin mới khi được yêu cầu.
+- Không đặt câu hỏi hay thêm thông tin không được yêu cầu.
+- Nếu người dùng chào, hãy chào vui vẻ và không đặt câu hỏi.
+- Không gửi URL.
+- Khi code chỉ đưa ra lời giải thích ngắn gọn nhất và tập trung vào phần code hoặc giải thích trọng tâm.
 
+Hãy trả lời trung thực, chính xác, ngắn gọn, đúng trọng tâm, vui vẻ và thêm icon phù hợp. 😊 [/INST]";
 const MAX_HISTORY: usize = 20; // Giới hạn lịch sử hội thoại
 
 // Cấu trúc AppState
@@ -99,9 +106,14 @@ async fn generate_text(
     }
 }
 
-
-
-
+// Lệnh để xóa lịch sử hội thoại
+#[tauri::command]
+async fn clear_history(state: State<'_, Arc<AppState>>) -> Result<(), String> {
+    let mut history = state.history.lock().await;
+    history.clear();
+    println!("Chat history cleared");
+    Ok(())
+}
 
 #[tauri::command]
 fn greet(name: &str, email: &str) -> String {
@@ -118,7 +130,7 @@ pub fn run() {
 
     // Khởi tạo đối tượng TextGeneration
     let textgen = textgen::TextGeneration::new(
-        model, tokenizer, device.clone(), fastrand::u64(..), Some(0.2), Some(0.8), None, 1.3, 64,
+        model, tokenizer, device.clone(), 42, Some(0.15), Some(0.8), None, 1.2, 64,
     );
 
     // Đưa TextGeneration và lịch sử vào State của Tauri
@@ -128,7 +140,7 @@ pub fn run() {
     });
 
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet, generate_text])
+        .invoke_handler(tauri::generate_handler![greet, generate_text, clear_history]) // Đăng ký lệnh clear_history
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(

@@ -67,6 +67,7 @@
 .chat-history {
   flex: 1;
   padding: 20px;
+  padding-bottom: 150px; /* Đủ chỗ cho chiều cao của chat-input-container */
   overflow-y: auto;
   background-size: cover;
   background-position: center;
@@ -124,13 +125,15 @@
   padding: 15px;
   background-color: white;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  position: relative;
+  position: fixed;
   gap: 10px;
+  bottom: 0;
+  width: 87%;
 }
 
 .chat-input {
   flex: 1;
-  padding: 12px 20px;
+  padding: 12px 20px; 
   font-size: 16px;
   border: 2px solid #c5b7e0; /* Xanh tím nhạt */
   border-radius: 25px;
@@ -241,4 +244,198 @@
 .chat-message:hover .message-content {
   transform: translateY(-1px);
   box-shadow: 0 2px 5px rgba(106, 13, 173, 0.3); /* Xanh tím nhạt */
+}
+.chatbot-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.reset-button {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.reset-button:hover {
+  background-color: #ff3333;
+}
+/* Settings Controls Container */
+.chatbot-controls {
+  position: fixed; /* Thay đổi từ absolute sang fixed */
+  top: 25px;
+  left: 250px;
+  z-index: 1000;
+}
+
+/* Settings Button */
+.settings-button {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(5px);
+}
+
+.settings-button:hover {
+  background-color: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Settings Menu - Centered */
+.settings-menu {
+  position: fixed;
+  top: 50%;
+  left: 55%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 300px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.3s ease-out;
+  z-index: 1001; /* Đảm bảo menu luôn hiển thị trên cùng */
+}
+
+/* Overlay backdrop */
+.settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  animation: fadeInOverlay 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Reset Button */
+.reset-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #ff4757;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.reset-button:hover {
+  background-color: #ff6b81;
+  transform: translateY(-1px);
+}
+
+/* Background Selector */
+.background-selector {
+  margin-top: 16px;
+}
+
+.background-selector span {
+  display: block;
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.background-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.background-button {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.background-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.background-button.selected {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 2px #0084ff, 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Close button for settings menu */
+.settings-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 5px;
+  font-size: 20px;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.settings-close:hover {
+  color: #333;
+  transform: scale(1.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .settings-menu {
+    min-width: 90%;
+    max-width: 95%;
+    padding: 16px;
+  }
+  
+  .background-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .background-button {
+    width: 100%;
+    height: 70px;
+  }
 }

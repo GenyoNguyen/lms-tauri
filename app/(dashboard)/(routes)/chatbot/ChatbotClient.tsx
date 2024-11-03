@@ -26,6 +26,7 @@ const ChatbotClient = () => {
   const [isBotTyping, setIsBotTyping] = useState(false);
   const [isInputEmpty, setIsInputEmpty] = useState(true);
   const [backgroundImage, setBackgroundImage] = useState<string>(''); // State for selected background
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false); // State for settings menu
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -52,7 +53,7 @@ const ChatbotClient = () => {
       setIsBotTyping(true);
       const result = await invoke<string>('generate_text', {
         prompt: userInput,
-        sampleLen: 250
+        sampleLen: 400
       });
 
       if (inputRef.current) {
@@ -85,7 +86,7 @@ const ChatbotClient = () => {
 
   const startTypingEffect = (text: string) => {
     setTypingText('');
-    let index = 0;
+    let index = -1;
 
     const typeCharacter = () => {
       if (index < text.length) {
@@ -123,39 +124,81 @@ const ChatbotClient = () => {
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      second: '2-digit'
     });
   };
 
   const handleBackgroundChange = (image: string) => {
     setBackgroundImage(image);
-    console.log("Background image set to:", image); // Log giá trị của backgroundImage
+    //console.log("Background image set to:", image);
+  };
+
+  // Hàm reset cuộc trò chuyện
+  const handleReset = async () => {
+    setChatHistory([]);
+    setInput('');
+    setTypingText('');
+    setIsBotTyping(false);
+    setIsInputEmpty(true);
+    setBackgroundImage('bg3.png'); // Reset background image
+    try {
+      await invoke('clear_history'); // Gọi lệnh clear_history từ backend
+      console.log('Chat history cleared successfully');
+    } catch (error) {
+      console.error('Error clearing chat history:', error);
+    }
   };
 
   return (
     <div className="chatbot-container">
-
-      {/* Background selection component */}
-      <div className="background-selector">
-        <span>Chọn ảnh nền:</span>
-        <div className="background-options">
-          {backgroundImages.map((bg, index) => (
-            <button
-              key={index}
-              className={`background-button ${backgroundImage === bg ? 'selected' : ''}`}
-              style={{ 
-                backgroundImage: `url(${bg})`,
-                border: backgroundImage === bg ? '2px solid #0084ff' : '2px solid transparent'
-              }}
-              onClick={() => handleBackgroundChange(bg)}
-            />
-          ))}
-        </div>
+      {/* Settings Button */}
+      <div className="chatbot-controls">
+        <button
+          onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+          className="settings-button"
+        >
+          Settings
+        </button>
       </div>
+
+      {/* Settings Menu */}
+      {isSettingsOpen && (
+        <div className="settings-menu">
+          <button onClick={handleReset} className="reset-button">
+            Reset Conversation!
+          </button>
+
+          {/* Background selection component */}
+          <div className="background-selector">
+            <span>Chọn ảnh nền:</span>
+            <div className="background-options">
+              {backgroundImages.map((bg, index) => (
+                <button
+                  key={index}
+                  className={`background-button ${
+                    backgroundImage === bg ? 'selected' : ''
+                  }`}
+                  style={{
+                    backgroundImage: `url(${bg})`,
+                    border:
+                      backgroundImage === bg
+                        ? '2px solid #0084ff'
+                        : '2px solid transparent'
+                  }}
+                  onClick={() => handleBackgroundChange(bg)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div
         className="chat-history"
-        style={{ backgroundImage: backgroundImage ? `url(${backgroundImage})` : 'none' }}
+        style={{
+          backgroundImage: backgroundImage ? `url(${backgroundImage})` : 'none'
+        }}
       >
         <AnimatePresence>
           {chatHistory.map((message) => (
@@ -164,7 +207,7 @@ const ChatbotClient = () => {
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ type: "spring", duration: 0.5 }}
+              transition={{ type: 'spring', duration: 0.5 }}
               className={`chat-message ${message.sender}`}
             >
               <div className="message-content">
@@ -213,7 +256,7 @@ const ChatbotClient = () => {
         className="chat-input-container"
         initial={{ y: 50 }}
         animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100 }}
+        transition={{ type: 'spring', stiffness: 100 }}
       >
         <input
           ref={inputRef}
