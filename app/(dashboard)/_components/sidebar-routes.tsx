@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { BarChart, BotMessageSquare, Compass, Layout, List, BookUser } from "lucide-react";
+import { BarChart, BotMessageSquare, Compass, Layout, List, BookUser, Presentation} from "lucide-react";
 import { SidebarItem } from "./sidebar-item";
 import { usePathname } from "next/navigation";
 import './sidebar.css'; // Import CSS
@@ -26,7 +26,13 @@ const guestRoutes = [
         icon: BookUser,
         label: "Instruction",
         href: "/instruction"
+    },
+    {
+        icon: Presentation,
+        label: "WhiteBoard",
+        href: "/board"
     }
+
 ];
 
 const teacherRoutes = [
@@ -42,7 +48,7 @@ const teacherRoutes = [
     },
 ];
 
-export const SidebarRoutes = () => {
+export const SidebarRoutes = ({ isDark }: { isDark: boolean }) => { // Thêm isDark vào prop
     const pathname = usePathname();
     const isTeacherPage = pathname?.includes("teacher");
     const routes = isTeacherPage ? teacherRoutes : guestRoutes;
@@ -61,6 +67,7 @@ export const SidebarRoutes = () => {
                         icon={route.icon}
                         label={route.label}
                         href={route.href}
+                        isDark={isDark} // Truyền isDark xuống SidebarItem
                     />
                 </div>
             ))}

@@ -7,7 +7,7 @@
   flex-direction: column;
   height: 100vh;
   font-family: 'Roboto', sans-serif;
-  background-color: #f3f0ff; /* Xanh tím nhạt */
+  background-color: #d3b1e3; /* Xanh tím nhạt */
 }
 
 /* Header styles */
@@ -128,7 +128,7 @@
   position: fixed;
   gap: 10px;
   bottom: 0;
-  width: 87%;
+  width: 86%;
 }
 
 .chat-input {
@@ -438,4 +438,79 @@
     width: 100%;
     height: 70px;
   }
+}
+/* Dark mode styling */
+.chatbot-container.dark {
+  background-color: #1e1e2f; /* Nền tối */
+  color: #e4e4e7; /* Màu chữ sáng hơn */
+}
+
+.chatbot-container.dark .chat-header {
+  background-color: #333; /* Nền header tối hơn */
+}
+
+.chatbot-container.dark .background-selector,
+.chatbot-container.dark .chat-input-container {
+  background-color: #2a2a3b;
+}
+
+.chatbot-container.dark .send-button {
+  background-color: #4b0b8a; /* Màu nút gửi phù hợp với nền tối */
+}
+
+.chatbot-container.dark .message-content {
+  background-color: #3a3a4b;
+  color: #e4e4e7;
+}
+
+.chatbot-container.dark .message-content.bot {
+  background-color: #2d2d3a;
+}
+
+.chatbot-container.dark .settings-menu {
+  background-color: rgba(45, 45, 58, 0.95);
+  color: #e4e4e7;
+}
+
+.chatbot-container.dark .background-button.selected {
+  box-shadow: 0 0 0 2px #0084ff, 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.chatbot-container.dark .typing-dot {
+  background-color: #6a0dad; /* Giữ màu xanh tím đậm cho chế độ tối */
+}
+.chatbot-container.dark .settings-button:hover {
+  background-color: rgba(60, 60, 70, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.chatbot-container.dark .reset-button:hover {
+  background-color: #ff6b81;
+  transform: translateY(-1px);
+}
+.chatbot-container.dark .send-button {
+  background-color: #6a0dad;
+  color: white;
+}
+
+.chatbot-container.dark .send-button.disabled {
+  background-color: #555;
+  color: #888;
+  cursor: not-allowed;
+}
+.chatbot-container.dark .typing-dot {
+  background-color: #9b72d1; /* Màu sáng hơn cho dark mode */
+}
+.chatbot-container.dark .chat-input {
+  background-color: #2a2a3b; /* Nền tối hơn */
+  color: #e4e4e7; /* Màu chữ sáng hơn */
+  border-color: #d9e16a; /* Viền màu xanh tím đậm */
+}
+
+.chatbot-container.dark .chat-input::placeholder {
+  color: #888; /* Màu chữ nhạt hơn cho placeholder */
+}
+.chatbot-container.dark .background-selector span {
+  color: #e4e4e7; /* Màu chữ sáng hơn trong dark mode */
 }
