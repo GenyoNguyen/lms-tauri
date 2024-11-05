@@ -1,10 +1,16 @@
+use sea_orm::{Database, DatabaseConnection};
 use std::collections::VecDeque;
 use std::sync::Arc;
 use tauri::State;
 use tokio::sync::Mutex;
 
+use std::env;
+
 mod loader;
 mod textgen;
+
+mod api;
+use api::*;
 
 const CHAT_TEMPLATE: &str = "[INST] Bạn tên là Ps Retrov, giáo viên tư vấn học tập cho học sinh nhỏ tuổi, tinh thần thoải mái. 
 - Không lặp lại câu trả lời, không lặp lại câu hỏi của người dùng.
@@ -18,9 +24,10 @@ Hãy trả lời trung thực, chính xác, ngắn gọn, đúng trọng tâm, v
 const MAX_HISTORY: usize = 20; // Giới hạn lịch sử hội thoại
 
 // Cấu trúc AppState
-struct AppState {
-    textgen: Mutex<textgen::TextGeneration>,
-    history: Mutex<VecDeque<(String, String)>>, // Thêm `history` để lưu lịch sử hội thoại
+pub struct AppState {
+    pub textgen: Mutex<textgen::TextGeneration>,
+    pub history: Mutex<VecDeque<(String, String)>>, // Thêm `history` để lưu lịch sử hội thoại
+    pub conn: Mutex<DatabaseConnection>,
 }
 
 // Hàm định dạng prompt với CHAT_TEMPLATE và history
@@ -32,8 +39,11 @@ fn format_prompt(new_prompt: &str, history: &VecDeque<(String, String)>) -> Stri
         })
         .collect::<Vec<String>>()
         .join(" ");
-    
-    format!("{} {} [INST] {} [/INST]", CHAT_TEMPLATE, history_str, new_prompt)
+
+    format!(
+        "{} {} [INST] {} [/INST]",
+        CHAT_TEMPLATE, history_str, new_prompt
+    )
 }
 
 #[tauri::command]
@@ -64,7 +74,9 @@ async fn generate_text(
     let infer_handle = tokio::spawn(async move {
         // Lock `textgen` from `state_clone`
         let mut textgen = state_clone.textgen.lock().await;
-        let infer_result = textgen.infer(&formatted_prompt_clone, sample_len, &tx).await;
+        let infer_result = textgen
+            .infer(&formatted_prompt_clone, sample_len, &tx)
+            .await;
         drop(tx); // Close the sender to signal completion
         infer_result
     });
@@ -122,7 +134,7 @@ fn greet(name: &str, email: &str) -> String {
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
+pub async fn run() {
     let (model, tokenizer, device) = loader::model_loader().expect("Không thể tải mô hình");
 
     // In ra thông tin về device
@@ -130,17 +142,44 @@ pub fn run() {
 
     // Khởi tạo đối tượng TextGeneration
     let textgen = textgen::TextGeneration::new(
-        model, tokenizer, device.clone(), 42, Some(0.15), Some(0.8), None, 1.2, 64,
+        model,
+        tokenizer,
+        device.clone(),
+        42,
+        Some(0.15),
+        Some(0.8),
+        None,
+        1.2,
+        64,
     );
+
+    let db_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
+    let db = Database::connect(db_url)
+        .await
+        .expect("Database connection failed");
 
     // Đưa TextGeneration và lịch sử vào State của Tauri
     let state = Arc::new(AppState {
         textgen: Mutex::new(textgen),
         history: Mutex::new(VecDeque::new()), // Khởi tạo `history` trống
+        conn: db.into(),
     });
 
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet, generate_text, clear_history]) // Đăng ký lệnh clear_history
+        .manage(state)
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            generate_text,
+            clear_history,
+            get_dashboard_courses,
+            get_purchase,
+            get_categories,
+            get_search,
+            create_course,
+            update_course,
+            add_attachment,
+            remove_attachment
+        ]) // Đăng ký lệnh clear_history
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -151,7 +190,6 @@ pub fn run() {
             }
             Ok(())
         })
-        .manage(state)
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

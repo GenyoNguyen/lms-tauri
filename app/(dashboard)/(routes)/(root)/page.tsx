@@ -4,23 +4,34 @@ import { CoursesList } from "@/components/courses-list";
 
 import { CheckCircle, Clock, Loader2 } from "lucide-react";
 import { InfoCard } from "./_components/info-card";
-import axios from "axios";
 import { useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { CourseWithProgressWithCategory } from "@/actions/get-courses";
+import toast from "react-hot-toast";
 
 export default function Dashboard() {
   const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2"
 
-  const [{ coursesInProgress, completedCourses }, setDashboardCourses] = useState({ coursesInProgress: [], completedCourses: [] });
+  const [{ coursesInProgress, completedCourses }, setDashboardCourses] = useState<{
+        coursesInProgress: CourseWithProgressWithCategory[],
+        completedCourses: CourseWithProgressWithCategory[]
+      }>({ coursesInProgress: [], completedCourses: [] });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchDashboardCourses() {
-      const dashboardCourses = await axios.post("/api/dashboard", { userId: userId });
-      setDashboardCourses(dashboardCourses.data);
-      setIsLoading(false);
+      invoke<{
+        coursesInProgress: CourseWithProgressWithCategory[],
+        completedCourses: CourseWithProgressWithCategory[]
+      }>('get_dashboard_courses', {
+        userId
+      }).then(({coursesInProgress, completedCourses}) => {
+        setDashboardCourses({coursesInProgress, completedCourses});
+        setIsLoading(false);
+      }).catch(err => toast.error(err));
     }
-    fetchDashboardCourses();
-  }, []);
+  fetchDashboardCourses();
+}, []);
 
   if (coursesInProgress && completedCourses) {
     return (

@@ -1,17 +1,16 @@
 "use client";
 
 import * as z from "zod";
-import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import { ImageIcon, Pencil, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
 
 import { Course } from "@prisma/client";
 import Image from "next/image";
 import { FileUpload } from "@/components/file-upload";
+import { invoke } from "@tauri-apps/api/core";
 
 interface ImageFormProps {
     initialData: Course;
@@ -30,21 +29,21 @@ export const ImageForm = ({
     courseId
 }: ImageFormProps) => {
     const [isEditting, setIsEditting] = useState(false);
+    const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || "");
 
     const toggleEdit = () => setIsEditting((current) => !current);
 
-    const router = useRouter();
-
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         console.log(courseId);
-        try {
-            await axios.patch(`/api/courses`, { courseId ,values });
+
+        invoke("update_course", {
+            courseId,
+            updates: values
+        }).then(() => {
             toast.success("Course updated");
             toggleEdit();
-            router.refresh();
-        } catch {
-            toast.error("Something went wrong");
-        }
+            setImageUrl(values.imageUrl);
+        }).catch(err => toast.error(err));
     }
 
     return (
@@ -55,13 +54,13 @@ export const ImageForm = ({
                     {isEditting && (
                         <>Cancel</>
                     )}
-                    {!isEditting && !initialData.imageUrl && (
+                    {!isEditting && !imageUrl && (
                         <>
                             <PlusCircle className="h-4 w-4 mr-2"/>
                             Add an image
                         </>
                     )}
-                    {!isEditting && initialData.imageUrl && (
+                    {!isEditting && imageUrl && (
                         <>
                         <Pencil className="h-4 w-4 mr-2"/>
                         Edit image
@@ -70,7 +69,7 @@ export const ImageForm = ({
                 </Button>
             </div>
             {!isEditting && (
-                !initialData.imageUrl ? (
+                !imageUrl ? (
                     <div className="flex items-center justify-center h-60 bg-slate-200 rounded-md">
                         <ImageIcon className="h-10 w-10 text-slate-500"/>
                     </div>
@@ -80,7 +79,7 @@ export const ImageForm = ({
                             alt="Upload"
                             fill
                             className="object-cover rounded-md"
-                            src={initialData.imageUrl}
+                            src={imageUrl}
                         />
                     </div>
                 )

@@ -1,7 +1,6 @@
 "use client";
 
 import * as z from "zod";
-import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -16,11 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
 import { Input } from "@/components/ui/input";
 import { formatPrice } from "@/lib/format";
+import { invoke } from "@tauri-apps/api/core";
 
 interface PriceFormProps {
     initialData: Course;
@@ -36,15 +35,14 @@ export const PriceForm = ({
     courseId
 }: PriceFormProps) => {
     const [isEditting, setIsEditting] = useState(false);
+    const [price, setPrice] = useState(initialData?.price || undefined);
 
     const toggleEdit = () => setIsEditting((current) => !current);
-
-    const router = useRouter();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            price: initialData?.price || undefined
+            price
         },
     })
 
@@ -52,14 +50,15 @@ export const PriceForm = ({
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         console.log(courseId);
-        try {
-            await axios.patch(`/api/courses`, { courseId ,values });
+
+        invoke("update_course", {
+            courseId,
+            updates: values
+        }).then(() => {
             toast.success("Course updated");
             toggleEdit();
-            router.refresh();
-        } catch {
-            toast.error("Something went wrong");
-        }
+            setPrice(values.price);
+        }).catch(err => toast.error(err));
     }
 
     return (
@@ -80,9 +79,9 @@ export const PriceForm = ({
             {!isEditting && (
                 <p className={cn(
                     "text-sm mt-2",
-                    !initialData.price && "text-slate-500 italic"
+                    !price && "text-slate-500 italic"
                 )}>
-                    {initialData.price ? formatPrice(initialData.price) : "No price"}
+                    {price ? formatPrice(price) : "No price"}
                 </p>
             )}
             {isEditting && (

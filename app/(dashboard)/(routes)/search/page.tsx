@@ -7,8 +7,10 @@ import { CourseWithProgressWithCategory } from "@/actions/get-courses";
 import { redirect, useSearchParams } from "next/navigation";
 import { CoursesList } from "@/components/courses-list";
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { Loader2 } from "lucide-react";
+import { invoke } from "@tauri-apps/api/core";
+import { Category } from "@prisma/client";
+import toast from "react-hot-toast";
 
 // interface SearchPageProps {
 //     searchParams: {
@@ -20,22 +22,25 @@ import { Loader2 } from "lucide-react";
 const SearchPage = () => {
     const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     const searchParams = useSearchParams();
-    const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [courses, setCourses] = useState<CourseWithProgressWithCategory[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         async function fetchCategoryAndCourses() {
-            const response = await axios.get<{ name: string, id: string }[]>("/api/categories");
-            setCategories(response.data);
+            invoke<Category[]>("get_categories").then(categories => setCategories(categories) ).catch(err => toast.error(err));
+            
 
-            const coursesRes = await axios.post<CourseWithProgressWithCategory[]>("/api/search", {
+            invoke<CourseWithProgressWithCategory[]>("get_search", {
                 userId,
                 title: searchParams.get("title")?.toString(),
                 categoryId: searchParams.get("categoryId")?.toString()
-            });
-            console.log("Lmao");
-            console.log(coursesRes.data);
-            setCourses(coursesRes.data);
+            }).then(coursesRes => {
+                console.log("Lmao");
+                console.log(coursesRes);
+                setCourses(coursesRes);
+                setIsLoading(false);
+            }).catch(err => toast.error(err));
         }
         
         fetchCategoryAndCourses();
@@ -46,7 +51,11 @@ const SearchPage = () => {
         return redirect("/");
     }
 
-    if(courses) {
+    if (isLoading) {
+        return (
+            <Loader2 className="w-8 h-8 animate-spin"/>
+        )
+    } else {
         return ( 
             <>
                 <div className="px-6 pt-6 md:hidden md:mb-0 block">
@@ -60,10 +69,6 @@ const SearchPage = () => {
                 </div>
             </>
         );
-    } else {
-        return (
-            <Loader2 className="w-8 h-8 animate-spin"/>
-        )
     }
 }
  

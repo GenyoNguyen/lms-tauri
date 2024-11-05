@@ -1,7 +1,6 @@
 "use client";
 
 import * as z from "zod";
-import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -16,12 +15,12 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
 import { Combobox } from "@/components/ui/combobox";
 
 import React from "react";
+import { invoke } from "@tauri-apps/api/core";
 
 interface CategoryFormProps {
     initialData: Course;
@@ -39,15 +38,14 @@ export const CategoryForm = ({
     options
 }: CategoryFormProps) => {
     const [isEditting, setIsEditting] = useState(false);
+    const [categoryId, setCategoryId] = useState(initialData?.categoryId || "");
 
     const toggleEdit = () => setIsEditting((current) => !current);
-
-    const router = useRouter();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            categoryId: initialData?.categoryId || ""
+            categoryId: categoryId || ""
         },
     })
 
@@ -55,17 +53,18 @@ export const CategoryForm = ({
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         console.log(courseId);
-        try {
-            await axios.patch(`/api/courses`, { courseId, values });
+
+        invoke("update_course", {
+            courseId,
+            updates: values
+        }).then(() => {
             toast.success("Course updated");
             toggleEdit();
-            router.refresh();
-        } catch {
-            toast.error("Something went wrong");
-        }
+            setCategoryId(values.categoryId);
+        }).catch(err => toast.error(err));
     }
 
-    const selectedOption = options.find((option) => option.value === initialData.categoryId);
+    const selectedOption = options.find((option) => option.value === categoryId);
 
     return (
         <div className="mt-6 border bg-slate-100 rounded-md p-4">
@@ -85,7 +84,7 @@ export const CategoryForm = ({
             {!isEditting && (
                 <p className={cn(
                     "text-sm mt-2",
-                    !initialData.categoryId && "text-slate-500 italic"
+                    !categoryId && "text-slate-500 italic"
                 )}>
                     {selectedOption?.label || "No category"}
                 </p>

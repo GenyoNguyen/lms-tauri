@@ -1,7 +1,6 @@
 "use client";
 
 import * as z from "zod";
-import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -16,10 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Course } from "@prisma/client";
+import { invoke } from "@tauri-apps/api/core";
 
 interface DescriptionFormProps {
     initialData: Course;
@@ -37,10 +36,9 @@ export const DescriptionForm = ({
     courseId
 }: DescriptionFormProps) => {
     const [isEditting, setIsEditting] = useState(false);
+    const [description, setDescription] = useState(initialData?.description || "");
 
     const toggleEdit = () => setIsEditting((current) => !current);
-
-    const router = useRouter();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -53,14 +51,15 @@ export const DescriptionForm = ({
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         console.log(courseId);
-        try {
-            await axios.patch(`/api/courses`, { courseId, values });
+
+        invoke("update_course", {
+            courseId,
+            updates: values
+        }).then(() => {
             toast.success("Course updated");
             toggleEdit();
-            router.refresh();
-        } catch {
-            toast.error("Something went wrong");
-        }
+            setDescription(values.description);
+        }).catch(err => toast.error(err));
     }
 
     return (
@@ -81,9 +80,9 @@ export const DescriptionForm = ({
             {!isEditting && (
                 <p className={cn(
                     "text-sm mt-2",
-                    !initialData.description && "text-slate-500 italic"
+                    !description && "text-slate-500 italic"
                 )}>
-                    {initialData.description || "No description"}
+                    {description || "No description"}
                 </p>
             )}
             {isEditting && (

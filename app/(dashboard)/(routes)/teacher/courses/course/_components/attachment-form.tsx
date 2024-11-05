@@ -1,16 +1,15 @@
 "use client";
 
 import * as z from "zod";
-import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import { File, Loader2, PlusCircle, X } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
 
 import { Attachment, Course } from "@prisma/client";
 import { FileUpload } from "@/components/file-upload";
+import { invoke } from "@tauri-apps/api/core";
 
 interface AttachmentFormProps {
     initialData: Course & { attachments: Attachment[] };
@@ -26,36 +25,43 @@ export const AttachmentForm = ({
     initialData,
     courseId
 }: AttachmentFormProps) => {
+    const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     const [isEditting, setIsEditting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [attachments, setAttachments] = useState(initialData.attachments);
 
     const toggleEdit = () => setIsEditting((current) => !current);
 
-    const router = useRouter();
-
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         console.log(courseId);
-        try {
-            await axios.post(`/api/courses/attachments`, { courseId, url: values.url });
-            toast.success("Course updated");
+
+        invoke<Attachment[]>("add_attachment", {
+            userId,
+            courseId,
+            url: values.url
+        }).then((res) => {
+            toast.success("Attachment added");
             toggleEdit();
-            router.refresh();
-        } catch {
-            toast.error("Something went wrong");
-        }
+            setAttachments(res);
+        }).catch(err => toast.error(err));
+        
     }
 
     const onDelete = async (id: string) => {
-        try {
-            setDeletingId(id);
-            await axios.patch(`/api/courses/attachments`, { courseId });
+        setDeletingId(id);
+        invoke<Attachment[]>("remove_attachment", {
+            attachmentId: id,
+            userId,
+            courseId
+        }).then((res) => {
             toast.success("Attachment deleted");
-            router.refresh();
-        } catch {
-            toast.error("Something went wrong");
-        } finally {
+            toggleEdit();
+            setAttachments(res);
+            console.log(attachments);
+        }).catch(err => toast.error(err))
+        .finally(() => {
             setDeletingId(null);
-        }
+        });
     }
 
     return (
@@ -76,14 +82,14 @@ export const AttachmentForm = ({
             </div>
             {!isEditting && (
                 <>
-                    {initialData.attachments.length === 0 && (
+                    {attachments.length === 0 && (
                         <p className="text-sm mt-2 text-slate-500 italic">
                             No attachments yet
                         </p>
                     )}
-                    {initialData.attachments.length > 0 && (
+                    {attachments.length > 0 && (
                         <div className="space-y-2">
-                            {initialData.attachments.map((attachment) => (
+                            {attachments.map((attachment) => (
                                 <div
                                     key={attachment.id}
                                     className="flex items-center p-3 w-full bg-sky-100 border-sky-200 border text-sky-700 rounded-md"

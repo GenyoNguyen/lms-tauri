@@ -1,7 +1,6 @@
 "use client";
 
 import * as z from "zod";
-import axios from "axios";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -18,6 +17,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
+import { invoke } from "@tauri-apps/api/core";
+import { Course } from "@prisma/client";
 
 const formSchema = z.object({
     title: z.string().min(1, {
@@ -26,6 +27,7 @@ const formSchema = z.object({
 });
 
 const CreatePage = () => {
+    const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     const router = useRouter();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -37,14 +39,14 @@ const CreatePage = () => {
     const { isSubmitting, isValid } = form.formState;
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        try {
-            const response = await axios.post("/api/courses", values);
-            router.push(`/teacher/courses/course/?courseId=${response.data.id}`);
+        invoke<Course>("create_course", {
+            userId,
+            title: values.title
+        }).then(response => {
+            router.push(`/teacher/courses/course/?courseId=${response.id}`);
             toast.success("Course created!");
             router.refresh();
-        } catch {
-            toast.error("Something went wrong.")
-        }
+        }).catch(err => toast.error(err));
     }
 
     return ( 
