@@ -1,13 +1,23 @@
 "use client";
-
+import React from "react";
+import "./page_root.css"
+import { CheckCircle, Clock } from "lucide-react";
 import { CoursesList } from "@/components/courses-list";
-
-import { CheckCircle, Clock, Loader2 } from "lucide-react";
 import { InfoCard } from "./_components/info-card";
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { CourseWithProgressWithCategory } from "@/actions/get-courses";
 import toast from "react-hot-toast";
+
+const SquareLoader = () => {
+  return (
+    <div className="loader">
+      {[...Array(8)].map((_, index) => (
+        <div key={index} className="loader-square" />
+      ))}
+    </div>
+  );
+};
 
 export default function Dashboard() {
   const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2"
@@ -50,8 +60,8 @@ export default function Dashboard() {
           />
         </div>
         {isLoading ? (
-          <div className="mt-10 items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin" />
+          <div className="flex items-center justify-center h-screen mt-10">
+            <SquareLoader />
           </div>
         ) : (
           <CoursesList
@@ -62,7 +72,9 @@ export default function Dashboard() {
     );
   } else {
     return (
-      <Loader2 className="w-8 h-8 animate-spin"/>
-    )
+      <div className="flex items-center justify-center h-screen mt-10">
+        <SquareLoader />
+      </div>
+    );
   }
 }

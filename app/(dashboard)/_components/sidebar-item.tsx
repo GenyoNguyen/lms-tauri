@@ -8,12 +8,14 @@ interface SidebarItemProps {
     icon: LucideIcon;
     label: string;
     href: string;
+    isDark?: boolean; // Thêm isDark vào SidebarItemProps
 }
 
 export const SidebarItem = ({
     icon: Icon,
     label,
-    href
+    href,
+    isDark = false // Mặc định là false nếu không truyền vào
 }: SidebarItemProps) => {
     const pathname = usePathname();
     const router = useRouter();
@@ -25,20 +27,14 @@ export const SidebarItem = ({
 
     const onClick = () => {
         router.push(href);
-    }
+    };
 
     return (
         <>
             <style jsx global>{`
                 @keyframes slideIn {
-                    from {
-                        opacity: 0;
-                        transform: translateX(-10px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateX(0);
-                    }
+                    from { opacity: 0; transform: translateX(-10px); }
+                    to { opacity: 1; transform: translateX(0); }
                 }
 
                 .sidebar-item {
@@ -51,14 +47,14 @@ export const SidebarItem = ({
                     content: '';
                     position: absolute;
                     inset: 0;
-                    background: linear-gradient(to right, #0ea5e9, #38bdf8);
+                    background: ${isDark ? 'linear-gradient(to right, #1e293b, #334155)' : 'linear-gradient(to right, #0ea5e9, #38bdf8)'};
                     opacity: 0;
                     z-index: -1;
                     transition: opacity 0.3s ease;
                 }
 
                 .sidebar-item:hover::before {
-                    opacity: 0.08;
+                    opacity: ${isDark ? 0.1 : 0.08};
                 }
 
                 .sidebar-item .icon {
@@ -100,36 +96,40 @@ export const SidebarItem = ({
                 onClick={onClick}
                 type="button"
                 className={cn(
-                    "sidebar-item w-full flex items-center gap-x-2 text-slate-500 text-sm font-[500] pl-6 pr-3",
+                    "sidebar-item w-full flex items-center gap-x-2 text-sm font-[500] pl-6 pr-3",
                     "transition-all duration-300",
-                    "hover:text-slate-600",
-                    isActive && "text-sky-700 hover:text-sky-700"
+                    isDark ? "text-slate-400 hover:text-slate-300" : "text-slate-500 hover:text-slate-600",
+                    isActive && (isDark ? "text-sky-400" : "text-sky-700")
                 )}
             >
                 <div className="flex items-center gap-x-2 py-4 relative">
                     <Icon
                         size={22}
                         className={cn(
-                            "icon text-slate-500 transition-colors duration-300",
-                            isActive && "text-sky-700"
+                            "icon transition-colors duration-300",
+                            isDark ? "text-slate-400" : "text-slate-500",
+                            isActive && (isDark ? "text-sky-400" : "text-sky-700")
                         )}
                     />
                     <span className="label whitespace-nowrap">
                         {label}
                     </span>
-                    
+
                     {isActive && (
-                        <span className="absolute -left-2 -right-2 top-0 bottom-0 bg-sky-50/50 rounded-sm -z-10" />
+                        <span
+                            className={`absolute -left-2 -right-2 top-0 bottom-0 rounded-sm -z-10 ${isDark ? "#060524" : "bg-sky-50/50"}`}
+                        />
                     )}
                 </div>
 
                 {/* Active indicator */}
-                <div className={cn(
-                    "active-indicator ml-auto w-[3px] h-12 rounded-l-full",
-                    isActive ? "bg-gradient-to-b from-sky-600 to-sky-400 active-pulse" : "opacity-0",
-                )}>
-                </div>
+                <div
+                    className={cn(
+                        "active-indicator ml-auto w-[3px] h-12 rounded-l-full",
+                        isActive ? `${isDark ? "bg-gradient-to-b from-sky-500 to-sky-400" : "bg-gradient-to-b from-sky-600 to-sky-400"} active-pulse` : "opacity-0"
+                    )}
+                />
             </button>
         </>
-    )
+    );
 }

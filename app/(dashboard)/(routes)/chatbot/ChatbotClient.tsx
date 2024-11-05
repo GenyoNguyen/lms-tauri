@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from "@/lib/utils";
 import './Chatbot.css';
+import { ThemeContext } from "../../ThemeContext"; 
+
 
 interface Message {
   id: string;
@@ -20,13 +23,14 @@ const backgroundImages = [
 ];
 
 const ChatbotClient = () => {
+  const { isDark } = useContext(ThemeContext); 
   const [input, setInput] = useState('');
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [typingText, setTypingText] = useState('');
   const [isBotTyping, setIsBotTyping] = useState(false);
   const [isInputEmpty, setIsInputEmpty] = useState(true);
-  const [backgroundImage, setBackgroundImage] = useState<string>(''); // State for selected background
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false); // State for settings menu
+  const [backgroundImage, setBackgroundImage] = useState<string>('');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -131,19 +135,17 @@ const ChatbotClient = () => {
 
   const handleBackgroundChange = (image: string) => {
     setBackgroundImage(image);
-    //console.log("Background image set to:", image);
   };
 
-  // Hàm reset cuộc trò chuyện
   const handleReset = async () => {
     setChatHistory([]);
     setInput('');
     setTypingText('');
     setIsBotTyping(false);
     setIsInputEmpty(true);
-    setBackgroundImage('bg3.png'); // Reset background image
+    setBackgroundImage('bg3.png');
     try {
-      await invoke('clear_history'); // Gọi lệnh clear_history từ backend
+      await invoke('clear_history');
       console.log('Chat history cleared successfully');
     } catch (error) {
       console.error('Error clearing chat history:', error);
@@ -151,39 +153,48 @@ const ChatbotClient = () => {
   };
 
   return (
-    <div className="chatbot-container">
-      {/* Settings Button */}
+    <div className={cn("chatbot-container", isDark && "dark")}>
       <div className="chatbot-controls">
         <button
           onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-          className="settings-button"
+          className={cn(
+            "settings-button",
+            isDark && "bg-gray-800 text-white border-gray-700"
+          )}
         >
           Settings
         </button>
       </div>
 
-      {/* Settings Menu */}
       {isSettingsOpen && (
-        <div className="settings-menu">
-          <button onClick={handleReset} className="reset-button">
+        <div className={cn(
+          "settings-menu",
+          isDark && "bg-gray-800 text-white"
+        )}>
+          <button 
+            onClick={handleReset} 
+            className="reset-button"
+          >
             Reset Conversation!
           </button>
 
-          {/* Background selection component */}
           <div className="background-selector">
-            <span>Chọn ảnh nền:</span>
+            <span>Choose background:</span>
             <div className="background-options">
               {backgroundImages.map((bg, index) => (
                 <button
                   key={index}
-                  className={`background-button ${
-                    backgroundImage === bg ? 'selected' : ''
-                  }`}
+                  className={cn(
+                    "background-button",
+                    backgroundImage === bg && "selected",
+                    isDark && "border-gray-600"
+                  )}
                   style={{
                     backgroundImage: `url(${bg})`,
-                    border:
-                      backgroundImage === bg
-                        ? '2px solid #0084ff'
+                    border: backgroundImage === bg
+                      ? '2px solid #0084ff'
+                      : isDark 
+                        ? '2px solid #4a5568'
                         : '2px solid transparent'
                   }}
                   onClick={() => handleBackgroundChange(bg)}
@@ -208,7 +219,11 @@ const ChatbotClient = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ type: 'spring', duration: 0.5 }}
-              className={`chat-message ${message.sender}`}
+              className={cn(
+                "chat-message",
+                message.sender,
+                isDark && "dark"
+              )}
             >
               <div className="message-content">
                 {message.sender === 'bot' ? (
@@ -228,7 +243,7 @@ const ChatbotClient = () => {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="chat-message bot"
+            className={cn("chat-message bot", isDark && "dark")}
           >
             <div className="message-content">
               <ReactMarkdown>{typingText}</ReactMarkdown>
@@ -240,7 +255,7 @@ const ChatbotClient = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="chat-message bot"
+            className={cn("chat-message bot", isDark && "dark")}
           >
             <div className="message-content typing-indicator">
               <div className="typing-dot"></div>
@@ -253,7 +268,10 @@ const ChatbotClient = () => {
       </div>
 
       <motion.div
-        className="chat-input-container"
+        className={cn(
+          "chat-input-container",
+          isDark && "bg-gray-800 border-t border-gray-700"
+        )}
         initial={{ y: 50 }}
         animate={{ y: 0 }}
         transition={{ type: 'spring', stiffness: 100 }}
@@ -265,11 +283,18 @@ const ChatbotClient = () => {
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder="Type your message here..."
-          className="chat-input"
+          className={cn(
+            "chat-input",
+            isDark && "bg-gray-700 text-white border-gray-600"
+          )}
         />
         <motion.button
           onClick={handleSendMessage}
-          className={`send-button ${isInputEmpty ? 'disabled' : ''}`}
+          className={cn(
+            "send-button",
+            isInputEmpty && "disabled",
+            isDark && "bg-purple-600 hover:bg-purple-700"
+          )}
           whileHover={!isInputEmpty ? { scale: 1.05 } : {}}
           whileTap={!isInputEmpty ? { scale: 0.95 } : {}}
           disabled={isInputEmpty}
