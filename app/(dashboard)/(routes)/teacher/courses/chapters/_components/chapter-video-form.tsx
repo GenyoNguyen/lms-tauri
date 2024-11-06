@@ -1,17 +1,16 @@
 "use client";
 
 import * as z from "zod";
-import axios from "axios";
 import MuxPlayer from "@mux/mux-player-react";
 
 import { Button } from "@/components/ui/button";
 import { Pencil, PlusCircle, Video } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
 
 import { Chapter, MuxData } from "@prisma/client";
 import { FileUpload } from "@/components/file-upload";
+import { invoke } from "@tauri-apps/api/core";
 
 interface ChapterVideoFormProps {
     initialData: Chapter & { muxData?: MuxData | null };
@@ -29,22 +28,24 @@ export const ChapterVideoForm = ({
     courseId,
     chapterId
 }: ChapterVideoFormProps) => {
+    const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     const [isEditting, setIsEditting] = useState(false);
+    const [videoUrl, setVideoUrl] = useState(initialData?.videoUrl || undefined);
 
     const toggleEdit = () => setIsEditting((current) => !current);
 
-    const router = useRouter();
-
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         console.log(courseId);
-        try {
-            await axios.patch(`/api/courses/chapters`, { courseId, chapterId, values });
+        invoke("update_chapter", {
+            userId,
+            courseId,
+            chapterId,
+            updates: values
+        }).then(() => {
             toast.success("Chapter updated");
             toggleEdit();
-            router.refresh();
-        } catch {
-            toast.error("Something went wrong");
-        }
+            setVideoUrl(values.videoUrl);
+        }).catch(err => toast.error(err));
     }
 
     return (
@@ -55,13 +56,13 @@ export const ChapterVideoForm = ({
                     {isEditting && (
                         <>Cancel</>
                     )}
-                    {!isEditting && !initialData.videoUrl && (
+                    {!isEditting && !videoUrl && (
                         <>
                             <PlusCircle className="h-4 w-4 mr-2"/>
                             Add a video
                         </>
                     )}
-                    {!isEditting && initialData.videoUrl && (
+                    {!isEditting && videoUrl && (
                         <>
                         <Pencil className="h-4 w-4 mr-2"/>
                         Edit video

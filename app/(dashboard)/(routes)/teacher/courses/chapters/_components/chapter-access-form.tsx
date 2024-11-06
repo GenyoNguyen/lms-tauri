@@ -1,7 +1,6 @@
 "use client";
 
 import * as z from "zod";
-import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -16,10 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Chapter } from "@prisma/client";
 import { Checkbox } from "@/components/ui/checkbox";
+import { invoke } from "@tauri-apps/api/core";
 
 interface ChapterAccessFormProps {
     initialData: Chapter;
@@ -36,16 +35,16 @@ export const ChapterAccessForm = ({
     courseId,
     chapterId
 }: ChapterAccessFormProps) => {
+    const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     const [isEditting, setIsEditting] = useState(false);
+    const [isCurrentlyFree, setIsFree] = useState(initialData.isFree);
 
     const toggleEdit = () => setIsEditting((current) => !current);
-
-    const router = useRouter();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            isFree: Boolean(initialData.isFree)
+            isFree: Boolean(isCurrentlyFree)
         },
     })
 
@@ -53,14 +52,16 @@ export const ChapterAccessForm = ({
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         console.log(courseId);
-        try {
-            await axios.patch(`/api/courses/chapters`, { courseId, chapterId, values });
+        invoke("update_chapter", {
+            userId,
+            courseId,
+            chapterId,
+            updates: values
+        }).then(() => {
             toast.success("Chapter updated");
             toggleEdit();
-            router.refresh();
-        } catch {
-            toast.error("Something went wrong");
-        }
+            setIsFree(values.isFree);
+        }).catch(err => toast.error(err));
     }
 
     return (
@@ -81,9 +82,9 @@ export const ChapterAccessForm = ({
             {!isEditting && (
                 <p className={cn(
                     "text-sm mt-2",
-                    !initialData.isFree && "text-slate-500 italic"
+                    !isCurrentlyFree && "text-slate-500 italic"
                 )}>
-                    {initialData.isFree ? (
+                    {isCurrentlyFree ? (
                         <>This chapter is free for preview.</>
                     ) : (
                         <>This chapter is not free.</>

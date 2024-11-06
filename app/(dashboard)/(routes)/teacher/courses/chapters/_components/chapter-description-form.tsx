@@ -1,7 +1,6 @@
 "use client";
 
 import * as z from "zod";
-import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -16,11 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Chapter } from "@prisma/client";
 import { Editor } from "@/components/editor";
 import { Preview } from "@/components/preview";
+import { invoke } from "@tauri-apps/api/core";
 
 interface ChapterDescriptionFormProps {
     initialData: Chapter;
@@ -37,16 +36,16 @@ export const ChapterDescriptionForm = ({
     courseId,
     chapterId
 }: ChapterDescriptionFormProps) => {
+    const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     const [isEditting, setIsEditting] = useState(false);
+    const [description, setDescription] = useState(initialData?.description || "");
 
     const toggleEdit = () => setIsEditting((current) => !current);
-
-    const router = useRouter();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            description: initialData?.description || ""
+            description
         },
     })
 
@@ -54,14 +53,16 @@ export const ChapterDescriptionForm = ({
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         console.log(courseId);
-        try {
-            await axios.patch(`/api/courses/chapters`, { courseId, chapterId, values });
+        invoke("update_chapter", {
+            userId,
+            courseId,
+            chapterId,
+            updates: values
+        }).then(() => {
             toast.success("Chapter updated");
             toggleEdit();
-            router.refresh();
-        } catch {
-            toast.error("Something went wrong");
-        }
+            setDescription(values.description);
+        }).catch(err => toast.error(err));
     }
 
     return (
@@ -82,12 +83,12 @@ export const ChapterDescriptionForm = ({
             {!isEditting && (
                 <div className={cn(
                     "text-sm mt-2",
-                    !initialData.description && "text-slate-500 italic"
+                    !description && "text-slate-500 italic"
                 )}>
-                    {!initialData.description && "No description"}
-                    {initialData.description && (
+                    {!description && "No description"}
+                    {description && (
                         <Preview
-                            value={initialData.description}
+                            value={description}
                         />
                     )}
                 </div>

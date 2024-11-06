@@ -1,10 +1,12 @@
 use std::sync::Arc;
 
-use entities::{attachment, category, course, purchase};
+use entities::{attachment, category, chapter, course, purchase};
+use sea_orm::DbErr;
 use serde_json::Value;
 use service::{
     ChapterDetails, Chapters, CourseWithChapters, CourseWithChaptersAndProgress, Courses,
-    DashboardCourses, OtherRoutes, SearchCourseWithProgressWithCategory,
+    DashboardCourses, OtherRoutes, ReorderData, SearchCourseWithProgressWithCategory, Teacher,
+    TeacherChapterWithMuxData, TeacherCourse,
 };
 
 use crate::AppState;
@@ -243,10 +245,11 @@ pub async fn publish_chapter(
     chapter_id: String,
 ) -> Result<(), String> {
     let db = state.conn.lock().await;
-    if let Ok(_) = Chapters::publish(&db, user_id, course_id, chapter_id).await {
-        Ok(())
-    } else {
-        Err("Cannot publish chapter".into())
+    match Chapters::publish(&db, user_id, course_id, chapter_id).await {
+        Ok(_) => Ok(()),
+        Err(DbErr::RecordNotFound(err)) => Err(err),
+        Err(DbErr::AttrNotSet(err)) => Err(err),
+        _ => Err("Cannot publish chapter".into()),
     }
 }
 
@@ -277,5 +280,83 @@ pub async fn update_chapter_progress(
         Ok(())
     } else {
         Err("Cannot update chapter progress".into())
+    }
+}
+
+#[tauri::command]
+pub async fn reorder_chapters(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+    list: Vec<ReorderData>,
+) -> Result<Vec<chapter::Model>, String> {
+    let db = state.conn.lock().await;
+    if let Ok(chapter) = Chapters::reorder(&db, user_id, course_id, list).await {
+        Ok(chapter)
+    } else {
+        Err("Cannot reorder chapters".into())
+    }
+}
+
+#[tauri::command]
+pub async fn create_chapter(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+    title: String,
+) -> Result<Vec<chapter::Model>, String> {
+    let db = state.conn.lock().await;
+    if let Ok(chapter) = Chapters::create(&db, user_id, course_id, title).await {
+        Ok(chapter)
+    } else {
+        Err("Cannot create chapter".into())
+    }
+}
+
+#[tauri::command]
+pub async fn update_chapter(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+    chapter_id: String,
+    updates: std::collections::HashMap<String, Value>,
+) -> Result<(), String> {
+    let db = state.conn.lock().await;
+    match Chapters::update(&db, user_id, course_id, chapter_id, updates).await {
+        Ok(_) => Ok(()),
+        Err(DbErr::RecordNotFound(err)) => Err(err),
+        Err(DbErr::AttrNotSet(err)) => Err(err),
+        Err(DbErr::Custom(err)) => Err(err),
+        _ => Err("Cannot update chapter".into()),
+    }
+}
+
+#[tauri::command]
+pub async fn get_teacher_course(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+) -> Result<TeacherCourse, String> {
+    let db = state.conn.lock().await;
+    match Teacher::course(&db, user_id, course_id).await {
+        Ok(coruse) => Ok(coruse),
+        Err(DbErr::RecordNotFound(err)) => Err(err),
+        Err(DbErr::AttrNotSet(err)) => Err(err),
+        Err(DbErr::Custom(err)) => Err(err),
+        _ => Err("Cannot get teacher course".into()),
+    }
+}
+
+#[tauri::command]
+pub async fn get_teacher_chapter(
+    state: tauri::State<'_, Arc<AppState>>,
+    course_id: String,
+    chapter_id: String,
+) -> Result<TeacherChapterWithMuxData, String> {
+    let db = state.conn.lock().await;
+    match Teacher::chapter(&db, course_id, chapter_id).await {
+        Ok(coruse) => Ok(coruse),
+        Err(DbErr::RecordNotFound(err)) => Err(err),
+        _ => Err("Cannot get teacher course".into()),
     }
 }

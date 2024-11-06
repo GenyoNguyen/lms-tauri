@@ -1,7 +1,6 @@
 "use client";
 
 import * as z from "zod";
-import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -21,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { Chapter, Course } from "@prisma/client";
 import { Input } from "@/components/ui/input";
 import { ChaptersList } from "./chapters-list";
+import { invoke } from "@tauri-apps/api/core";
 
 interface ChaptersFormProps {
     initialData: Course & { chapters: Chapter[] };
@@ -35,6 +35,7 @@ export const ChaptersForm = ({
     initialData,
     courseId
 }: ChaptersFormProps) => {
+    const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     const [isCreating, setIsCreating] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [chapters, setChapters] = useState(initialData.chapters);
@@ -54,30 +55,28 @@ export const ChaptersForm = ({
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         console.log(courseId);
-        try {
-            await axios.post(`/api/courses/chapters`, { courseId, title: values.title });
-            toast.success("Chapter created");
+        invoke<Chapter[]>("create_chapter", {
+            userId,
+            courseId,
+            title: values.title
+        }).then(updated_chapters => {
+            toast.success("Course created");
             toggleCreating();
-            router.refresh();
-        } catch {
-            toast.error("Something went wrong");
-        }
+            setChapters(updated_chapters);
+        }).catch(err => toast.error(err));
     }
 
     const onReorder = async (updateData: {id: string, position: number}[]) => {
-        try {
-            setIsUpdating(true);
-            await axios.put(`/api/courses/chapters/reorder`, {
-                courseId,
-                list: updateData
-            });
-            toast.success("Chapters reordered");
-            router.refresh();
-        } catch {
-            toast.error("Some thing went wrong");
-        } finally {
-            setIsUpdating(false);
-        }
+        setIsUpdating(true);
+        invoke<Chapter[]>("reorder_chapters", {
+            userId,
+            courseId,
+            list: updateData
+        }).then(reordered_chapters => {
+            toast.success("Chapter reordered");
+            setChapters(reordered_chapters);
+        }).catch(err => toast.error(err))
+        .finally(() => setIsUpdating(false));
     }
 
     const onEdit = (id: string) => {
@@ -143,13 +142,13 @@ export const ChaptersForm = ({
             {!isCreating && (
                 <div className={cn(
                     "text-sm mt-2",
-                    !initialData.chapters.length && "text-slate-500 italic"
+                    !chapters.length && "text-slate-500 italic"
                 )}>
-                    {!initialData.chapters.length && "No chapters"}
+                    {!chapters.length && "No chapters"}
                     <ChaptersList
-                        onEdit={(id) => onEdit(id)}
-                        onReorder={(updateData) => onReorder(updateData)}
-                        items={initialData.chapters || []}
+                        onEdit={onEdit}
+                        onReorder={onReorder}
+                        items={chapters}
                     />
                 </div>
             )}

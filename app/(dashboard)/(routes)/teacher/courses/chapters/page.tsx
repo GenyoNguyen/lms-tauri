@@ -12,8 +12,9 @@ import { ChapterVideoForm } from "./_components/chapter-video-form";
 import { Banner } from "@/components/banner";
 import { ChapterActions } from "./_components/chapter-actions";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { Chapter, MuxData } from "@prisma/client";
+import { invoke } from "@tauri-apps/api/core";
+import toast from "react-hot-toast";
 
 const ChapterIdPage = () => {
     // const { userId } = auth();
@@ -28,11 +29,14 @@ const ChapterIdPage = () => {
 
     useEffect(() => {
         async function fetchChapter() {
-            const fetchedChapter = await axios.post("/api/teacher/chapter", { courseId, chapterId });
-            setChapter(fetchedChapter.data);
-            setIsLoading(false);
+            invoke<{ muxData: MuxData } & Chapter>("get_teacher_chapter", {
+                courseId,
+                chapterId
+            }).then(chapter => {
+                setChapter(chapter);
+                setIsLoading(false);
+            }).catch(err => toast.error(err));
         }
-        console.log("Lmao");
         fetchChapter();
     }, [chapterId, courseId])
     

@@ -15,11 +15,11 @@ import { Banner } from "@/components/banner";
 import { Actions } from "./_components/actions";
 import { useEffect, useState } from "react";
 import { Attachment, Category, Chapter, Course } from "@prisma/client";
-import axios from "axios";
+import { invoke } from "@tauri-apps/api/core";
+import toast from "react-hot-toast";
 
 const CourseIdPage = () => {
-    // const { userId } = auth();
-const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
+    const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     const searchParams = useSearchParams();
     const courseId = searchParams.get("courseId");
     const [course, setCourse] = useState<({chapters: Chapter[], attachments: Attachment[]} & Course)>();
@@ -28,12 +28,18 @@ const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
 
     useEffect(() => {
         async function fetchCourse() {
-            const fetchedCourse = await axios.post("/api/teacher/course", { courseId });
-            setCourse(fetchedCourse.data);
 
-            const fetchedCategories = await axios.get("/api/teacher/categories");
-            setCategories(fetchedCategories.data);
-            setIsLoading(false);
+            invoke<({chapters: Chapter[], attachments: Attachment[]} & Course)>("get_teacher_course", {
+                userId,
+                courseId
+            }).then(course => {
+                setCourse(course);
+            }).catch(err => toast.error(err));
+            
+            invoke<Category[]>("get_categories").then(categories => {
+                setCategories(categories);
+                setIsLoading(false);
+            }).catch(err => toast.error(err));
         }
 
         fetchCourse();

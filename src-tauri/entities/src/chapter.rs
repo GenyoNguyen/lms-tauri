@@ -16,9 +16,9 @@ pub struct Model {
     #[sea_orm(column_name = "videoUrl", column_type = "Text", nullable)]
     pub video_url: Option<String>,
     pub position: i32,
-    #[sea_orm(column_name = "isPublished")]
+    #[sea_orm(column_name = "isPublished", default_value = false)]
     pub is_published: bool,
-    #[sea_orm(column_name = "isFree")]
+    #[sea_orm(column_name = "isFree", default_value = false)]
     pub is_free: bool,
     #[sea_orm(column_name = "courseId", column_type = "Text")]
     pub course_id: String,

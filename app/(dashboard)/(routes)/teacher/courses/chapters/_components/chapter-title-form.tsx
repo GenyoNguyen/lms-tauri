@@ -1,7 +1,6 @@
 "use client";
 
 import * as z from "zod";
-import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -17,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { invoke } from "@tauri-apps/api/core";
 
 interface ChapterTitleFormProps {
     initialData: {
@@ -36,11 +35,12 @@ export const ChapterTitleForm = ({
     courseId,
     chapterId,
 }: ChapterTitleFormProps) => {
+    const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     const [isEditting, setIsEditting] = useState(false);
+    const [title, setTitle] = useState(initialData.title);
 
     const toggleEdit = () => setIsEditting((current) => !current);
 
-    const router = useRouter();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -51,14 +51,16 @@ export const ChapterTitleForm = ({
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         console.log(courseId);
-        try {
-            await axios.patch(`/api/courses/chapters`, { courseId, chapterId, values });
+        invoke("update_chapter", {
+            userId,
+            courseId,
+            chapterId,
+            updates: values
+        }).then(() => {
             toast.success("Chapter updated");
             toggleEdit();
-            router.refresh();
-        } catch {
-            toast.error("Something went wrong");
-        }
+            setTitle(values.title);
+        }).catch(err => toast.error(err));
     }
 
     return (
@@ -78,7 +80,7 @@ export const ChapterTitleForm = ({
             </div>
             {!isEditting && (
                 <p className="text-sm mt-2">
-                    {initialData.title}
+                    {title}
                 </p>
             )}
             {isEditting && (

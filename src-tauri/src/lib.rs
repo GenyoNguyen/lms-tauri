@@ -58,7 +58,7 @@ async fn generate_text(
     let mut history = state.history.lock().await;
 
     // Format the prompt
-    let formatted_prompt = format_prompt(&prompt, &history);    
+    let formatted_prompt = format_prompt(&prompt, &history);
     println!("Formatted prompt: {}", formatted_prompt);
 
     // Create a channel for token communication
@@ -189,7 +189,12 @@ pub async fn run() {
             delete_chapter,
             publish_chapter,
             unpublish_chapter,
-            update_chapter_progress
+            update_chapter_progress,
+            reorder_chapters,
+            create_chapter,
+            update_chapter,
+            get_teacher_course,
+            get_teacher_chapter
         ]) // Đăng ký lệnh clear_history
         .setup(|app| {
             if cfg!(debug_assertions) {
