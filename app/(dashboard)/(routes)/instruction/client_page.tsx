@@ -400,7 +400,7 @@ const MovingBackground = ({ isDark } : {isDark : boolean}) => {
 
   const circleColor = isDark
     ? 'rgba(255, 255, 255, 0.1)'
-    : 'rgba(0, 0, 0, 0.1)'; // Darker circles in light mode
+    : 'rgba(0, 0, 0, 0.1)'; 
 
   return (
     <div className={`absolute top-0 left-0 w-full h-full ${backgroundGradient} overflow-hidden`}>

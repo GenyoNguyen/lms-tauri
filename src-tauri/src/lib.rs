@@ -58,7 +58,7 @@ async fn generate_text(
     let mut history = state.history.lock().await;
 
     // Format the prompt
-    let formatted_prompt = format_prompt(&prompt, &history);
+    let formatted_prompt = format_prompt(&prompt, &history);    
     println!("Formatted prompt: {}", formatted_prompt);
 
     // Create a channel for token communication
