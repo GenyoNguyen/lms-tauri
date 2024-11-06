@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect, useRef, useContext } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import ReactMarkdown from 'react-markdown';
