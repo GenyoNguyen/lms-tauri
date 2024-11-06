@@ -24,12 +24,12 @@ const ChapterIdPage = () => {
     const courseId = searchParams.get("courseId");
     const chapterId = searchParams.get("chapterId");
 
-    const [chapter, setChapter] = useState<{ muxData: MuxData } & Chapter>();
+    const [chapter, setChapter] = useState<{ muxData: MuxData | null } & Chapter>();
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         async function fetchChapter() {
-            invoke<{ muxData: MuxData } & Chapter>("get_teacher_chapter", {
+            invoke<{ muxData: MuxData | null } & Chapter>("get_teacher_chapter", {
                 courseId,
                 chapterId
             }).then(chapter => {

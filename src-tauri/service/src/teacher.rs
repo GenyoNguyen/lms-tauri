@@ -1,10 +1,6 @@
-use std::env;
-
 use ::entities::{prelude::*, *};
 use sea_orm::*;
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use sqlx::types::{chrono::Utc, Uuid};
+use serde::Serialize;
 
 pub struct Teacher;
 
@@ -22,7 +18,7 @@ pub struct TeacherCourse {
 pub struct TeacherChapterWithMuxData {
     #[serde(flatten)]
     chapter: chapter::Model,
-    mux_data: mux_data::Model,
+    mux_data: Option<mux_data::Model>,
 }
 
 impl Teacher {
@@ -85,11 +81,6 @@ impl Teacher {
             .filter(mux_data::Column::ChapterId.eq(chapter_id.clone()))
             .one(db)
             .await?;
-
-        let mux_data = match mux_data {
-            Some(mux_data) => mux_data,
-            _ => return Err(DbErr::RecordNotFound("Cannot find mux data".into())),
-        };
 
         Ok(TeacherChapterWithMuxData { chapter, mux_data })
     }
