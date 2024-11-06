@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import WebViewer from '@pdftron/webviewer';
+import WebViewer, { WebViewerInstance } from '@pdftron/webviewer';
 
 interface WebViewerComponentProps {
   file: File | null;
@@ -9,7 +9,7 @@ const WebViewerComponent: React.FC<WebViewerComponentProps> = ({ file }) => {
   const viewerDiv = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let viewerInstance: any = null;
+    let viewerInstance: WebViewerInstance | null = null;
 
     if (viewerDiv.current) {
       WebViewer(
