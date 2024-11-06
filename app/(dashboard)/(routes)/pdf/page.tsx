@@ -19,7 +19,6 @@ const App: React.FC = () => {
   return (
     <div>
       {isClient && <PdfViewer />}
-      {isClient && <ChatbotClient />}
     </div>
   );
 };
