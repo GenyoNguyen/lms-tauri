@@ -31,6 +31,11 @@ const guestRoutes = [
         icon: Presentation,
         label: "WhiteBoard",
         href: "/board"
+    }, 
+    {
+        icon: List,
+        label: "PDF",
+        href: "/pdf"
     }
 
 ];
