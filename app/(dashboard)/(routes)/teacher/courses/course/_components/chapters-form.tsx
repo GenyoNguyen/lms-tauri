@@ -37,6 +37,7 @@ export const ChaptersForm = ({
 }: ChaptersFormProps) => {
     const [isCreating, setIsCreating] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [chapters, setChapters] = useState(initialData.chapters);
 
     const toggleCreating = () => setIsCreating((current) => !current);
 
@@ -146,8 +147,8 @@ export const ChaptersForm = ({
                 )}>
                     {!initialData.chapters.length && "No chapters"}
                     <ChaptersList
-                        onEdit={onEdit}
-                        onReorder={onReorder}
+                        onEdit={(id) => onEdit(id)}
+                        onReorder={(updateData) => onReorder(updateData)}
                         items={initialData.chapters || []}
                     />
                 </div>

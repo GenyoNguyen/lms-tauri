@@ -7,6 +7,7 @@ import { CourseProgress } from "@/components/course-progress";
 
 interface CourseCardProps {
     id: string;
+    chapterId: string;
     title: string;
     imageUrl: string;
     chaptersLength: number;
@@ -17,6 +18,7 @@ interface CourseCardProps {
 
 export const CourseCard = ({
     id,
+    chapterId,
     title,
     imageUrl,
     chaptersLength,
@@ -26,8 +28,9 @@ export const CourseCard = ({
 }: CourseCardProps) => {
     const searchParams = new URLSearchParams();
     searchParams.set("courseId", id);
+    searchParams.set("chapterId", chapterId);
     return (
-        <Link href={`/courses/?${searchParams.toString()}`}>
+        <Link href={`/courses/chapters/?${searchParams.toString()}`}>
             <div className="group hover:shadow-sm transition overflow-hidden border rounded-lg p-3 h-full">
                 <div className="relative w-full aspect-video rounded-md overflow-hidden">
                     <Image

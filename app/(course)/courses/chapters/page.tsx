@@ -11,8 +11,8 @@ import { File, Loader2 } from "lucide-react";
 import { CourseProgressButton } from "./_components/course-progress-button";
 import { useEffect, useState } from "react";
 import { Attachment, Chapter, Course, MuxData, Purchase, UserProgress } from "@prisma/client";
-import axios from "axios";
 import CourseLayout from "../_components/course-layout";
+import { invoke } from "@tauri-apps/api/core";
 
 interface ChapterDetails {
     chapter: Chapter | null;
@@ -41,35 +41,54 @@ const ChapterIdPage = () => {
         })[];
     } & Course)>();
     const [progressCount, setProgressCount] = useState<number>(0);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (!userId) {
-            return router.push("/");
-        }
+        // if (!userId) {
+        //     return router.push("/");
+        // }
         async function fetchChapterDetails() {
-            const fetchedChapterDetails = await axios.post("/api/courses/chapters/chapter", {
+
+            invoke<ChapterDetails>("get_chapter", {
                 userId,
                 courseId: params.courseId,
                 chapterId: params.chapterId
+            }).then(chapter => {
+                setChapterDetails(chapter);
+            }).catch(err => {
+                console.log(err);
             });
-            setChapterDetails(fetchedChapterDetails.data);
 
-            const fetchedCourse = await axios.post("/api/courses/course/progress", { userId, courseId: params.courseId });
-            setCourse(fetchedCourse.data);
-
-            if(!course) {
+            invoke<({
+                chapters: (Chapter & {
+                    userProgress: UserProgress[] | null;
+                })[];
+            } & Course)>("get_course_with_chapters_with_progress", {
+                userId,
+                courseId: params.courseId
+            }).then(course => {
+                setCourse(course);
+            }).catch(err => {
+                console.log(err);
                 return router.push("/");
-            }
+            });
 
-            const fetchedProgressCount = await axios.post("/api/courses/course/progress/count", { userId, courseId: params.courseId });
-            setProgressCount(fetchedProgressCount.data);
+            invoke<number>("get_progress_percentage", {
+                userId,
+                courseId: params.courseId
+            }).then(progressPercentage => {
+                setProgressCount(progressPercentage);
+            }).catch(err => {
+                console.log(err);
+                return router.push("/");
+            });
         }
-        fetchChapterDetails();
-    }, [course, params.chapterId, params.courseId, router])
+        fetchChapterDetails().then(() => setIsLoading(false));
+    }, [params.chapterId, params.courseId, router])
 
     
 
-    if (chapterDetails && course) {
+    if (chapterDetails && course && !isLoading) {
         const {
             chapter,
             coursePrice,

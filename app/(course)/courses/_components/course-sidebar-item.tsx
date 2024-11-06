@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { CheckCircle, Lock, PlayCircle } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface CourseSidebarItemProps {
     label: string;
@@ -19,14 +19,18 @@ export const CourseSidebarItem = ({
     courseId,
     isLocked
 }: CourseSidebarItemProps) => {
-    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const router = useRouter();
 
     const Icon = isLocked ? Lock : (isCompleted ? CheckCircle : PlayCircle)
-    const isActive = pathname?.includes(id);
+    const isActive = searchParams.get("chapterId") === id;
 
     const onClick = () => {
-        router.push(`/courses/${courseId}/chapters/${id}`);
+        const params = new URLSearchParams();
+        params.set("courseId", courseId);
+        params.set("chapterId", id);
+
+        router.push(`/courses/chapters?${params.toString()}`);
     }
     return (
         <button

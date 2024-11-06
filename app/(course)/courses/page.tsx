@@ -1,23 +1,32 @@
 "use client";
 
 import { Chapter, Course } from "@prisma/client";
-import axios from "axios";
+import { invoke } from "@tauri-apps/api/core";
 import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+
+type CourseWithChapters = Course & {
+    chapters: Chapter[];
+};
 
 const CourseIdPage = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const courseId = searchParams.get("courseId");
-    const [course, setCourse] = useState<Course & { chapters: Chapter[] }>();
+    const [course, setCourse] = useState<CourseWithChapters>();
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         async function fetchCourse () {
-            const fetchedCourse = await axios.post("/api/courses/course", { courseId });
-            setCourse(fetchedCourse.data);
-            setIsLoading(false);
+
+            invoke<CourseWithChapters>("get_course", {
+                courseId
+            }).then(course => {
+                setCourse(course);
+                setIsLoading(false);
+            }).catch(err => toast.error(err));
         }
         fetchCourse();
     }, [courseId])
@@ -26,7 +35,7 @@ const CourseIdPage = () => {
         return router.push("/");
     }
 
-    if (course) {
+    if (course && !isLoading) {
         const params = new URLSearchParams();
         params.set("courseId", course.id);
         params.set("chapterId", course.chapters[0].id);

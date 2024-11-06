@@ -3,7 +3,7 @@
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { Button } from "@/components/ui/button";
 import { useConfettiStore } from "@/hooks/use-confetti-store";
-import axios from "axios";
+import { invoke } from "@tauri-apps/api/core";
 import { Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -20,44 +20,50 @@ export const Actions = ({
     courseId,
     isPublished
 }: ActionsProps) => {
+    const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     const router = useRouter();
     const confetti = useConfettiStore();
     const [isLoading, setIsLoading] = useState(false);
+    const [isCurrentlyPublished, setIsCurrentlyPublished] = useState(isPublished);
 
     const onClick = async () => {
-        try {
-            setIsLoading(true);
-            
-            if (isPublished) {
-                await axios.patch(`/api/courses/unpublish`, { courseId });
+        setIsLoading(true);
+        
+        if (isCurrentlyPublished) {
+            invoke("unpublish_course", {
+                userId,
+                courseId
+            }).then(() => {
                 toast.success("Course unpublished");
-            } else {
-                await axios.patch(`/api/courses/publish`, { courseId });
+                setIsCurrentlyPublished(false);
+            }).catch(err => toast.error(err))
+            .finally(() => setIsLoading(false));
+        } else {
+            invoke("publish_course", {
+                userId,
+                courseId
+            }).then(() => {
                 toast.success("Course published");
+                setIsCurrentlyPublished(true);
                 confetti.onOpen();
-            }
-
-            router.refresh();
-        } catch {
-            toast.error("Something went wrong");
-        } finally {
-            setIsLoading(false);
+            }).catch(err => toast.error(err))
+            .finally(() => setIsLoading(false));
         }
+        
+        router.refresh();
     }
 
     const onDelete = async () => {
-        try {
-            setIsLoading(true);
-
-            await axios.patch(`/api/courses/delete`, { courseId });
+        setIsLoading(true);
+        invoke("delete_course", {
+            userId,
+            courseId,
+        }).then(() => {
             toast.success("Course deleted");
             router.push(`/teacher/courses`);
             router.refresh();
-        } catch {
-            toast.error("Something went wrong");
-        } finally {
             setIsLoading(false);
-        }
+        }).catch(err => toast.error(err));
     }
 
     return (
@@ -68,7 +74,7 @@ export const Actions = ({
                 variant="outline"
                 size="sm"
             >
-                {isPublished ? "Unpublish" : "Publish"}
+                {isCurrentlyPublished ? "Unpublish" : "Publish"}
             </Button>
             <ConfirmModal onConfirm={onDelete}>
                 <Button size="sm" disabled={isLoading}>

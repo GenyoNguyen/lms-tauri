@@ -1,9 +1,41 @@
+use std::env;
+
 use ::entities::{prelude::*, *};
 use sea_orm::*;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::types::{chrono::Utc, Uuid};
 
 pub struct Courses;
+
+#[derive(FromQueryResult, Debug, Serialize, Deserialize)]
+struct ChapterId {
+    id: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct CourseWithChaptersAndProgress {
+    #[serde(flatten)]
+    course: course::Model,
+    chapters: Vec<ChapterWithProgress>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ChapterWithProgress {
+    #[serde(flatten)]
+    chapter: chapter::Model,
+    user_progress: Vec<user_progress::Model>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct CourseWithChapters {
+    #[serde(flatten)]
+    course: course::Model,
+    chapters: Vec<chapter::Model>,
+}
 
 impl Courses {
     pub async fn create(
@@ -128,5 +160,189 @@ impl Courses {
             .all(db)
             .await?;
         Ok(res)
+    }
+
+    pub async fn delete(db: &DbConn, user_id: String, course_id: String) -> Result<(), DbErr> {
+        let client = reqwest::Client::new();
+        let mux_token_id = env::var("MUX_TOKEN_ID").expect("Cannot get Mux token id");
+        let mux_token_secret = env::var("MUX_TOKEN_SECRET").expect("Cannot get Mux token secret");
+
+        let delete_course = Course::find_by_id(course_id.clone())
+            .filter(course::Column::UserId.eq(user_id.clone()))
+            .one(db)
+            .await?;
+
+        let delete_course = match delete_course {
+            Some(course) => course,
+            None => return Err(DbErr::Custom("Cannot find course".into())),
+        };
+
+        let mux_data = MuxData::find()
+            .join(JoinType::InnerJoin, mux_data::Relation::Chapter.def())
+            .filter(chapter::Column::CourseId.eq(course_id))
+            .all(db)
+            .await?;
+
+        for data in mux_data.iter() {
+            let _ = client
+                .delete(format!(
+                    "https://api.mux.com/video/v1/assets/{}",
+                    data.asset_id
+                ))
+                .basic_auth(mux_token_id.clone(), Some(mux_token_secret.clone()))
+                .send();
+        }
+
+        delete_course.delete(db).await?;
+
+        Ok(())
+    }
+
+    pub async fn unpublish(db: &DbConn, user_id: String, course_id: String) -> Result<(), DbErr> {
+        let course = Course::find_by_id(course_id.clone())
+            .filter(course::Column::UserId.eq(user_id.clone()))
+            .one(db)
+            .await?;
+
+        match course.clone() {
+            Some(_) => (),
+            None => return Err(DbErr::Custom("Cannot find course".into())),
+        };
+
+        let mut course: course::ActiveModel = course.unwrap().into();
+        course.is_published = Set(false);
+        course.update(db).await?;
+
+        Ok(())
+    }
+
+    pub async fn publish(db: &DbConn, user_id: String, course_id: String) -> Result<(), DbErr> {
+        let course = Course::find_by_id(course_id.clone())
+            .filter(course::Column::UserId.eq(user_id.clone()))
+            .one(db)
+            .await?;
+
+        let publish_course = match course.clone() {
+            Some(course) => course,
+            None => return Err(DbErr::Custom("Cannot find course".into())),
+        };
+
+        let chapters = chapter::Entity::find()
+            .filter(chapter::Column::CourseId.eq(course_id.clone()))
+            .all(db)
+            .await?;
+
+        let has_published_chapter = chapters.iter().any(|chapter| chapter.is_published);
+
+        if !(publish_course.description.is_some()
+            && publish_course.image_url.is_some()
+            && publish_course.category_id.is_some()
+            && has_published_chapter)
+        {
+            return Err(DbErr::Custom("Missing required fields".into()));
+        }
+
+        let mut course: course::ActiveModel = course.unwrap().into();
+        course.is_published = Set(true);
+        course.update(db).await?;
+
+        Ok(())
+    }
+
+    pub async fn get(db: &DbConn, course_id: String) -> Result<CourseWithChapters, DbErr> {
+        let course = Course::find_by_id(course_id.clone())
+            .one(db)
+            .await?
+            .unwrap();
+
+        let chapters = Chapter::find()
+            .filter(chapter::Column::CourseId.eq(course_id))
+            .all(db)
+            .await?;
+
+        Ok(CourseWithChapters { course, chapters })
+    }
+
+    pub async fn get_with_chapters_with_progress(
+        db: &DbConn,
+        user_id: String,
+        course_id: String,
+    ) -> Result<CourseWithChaptersAndProgress, DbErr> {
+        // Step 1: Find the course by id
+        let course = course::Entity::find()
+            .filter(course::Column::Id.eq(course_id.clone()))
+            .one(db)
+            .await?;
+
+        // If no course is found, return None
+        let course = match course {
+            Some(course) => course,
+            None => return Err(DbErr::Custom("Cannot find course".into())),
+        };
+
+        // Step 2: Find related chapters for this course, ordered by position, and include userProgress
+        let chapters_with_progress: Vec<ChapterWithProgress> = chapter::Entity::find()
+            .filter(chapter::Column::CourseId.eq(course_id.clone()))
+            .filter(chapter::Column::IsPublished.eq(true)) // Filter for published chapters
+            .order_by_asc(chapter::Column::Position) // Order by position in ascending order
+            .find_also_related(user_progress::Entity)
+            .all(db)
+            .await?
+            .into_iter()
+            .filter_map(|(chapter, progress)| {
+                // Filter userProgress by user_id
+                let user_progress: Vec<user_progress::Model> = progress
+                    .into_iter()
+                    .filter(|up| up.user_id == user_id)
+                    .collect();
+
+                Some(ChapterWithProgress {
+                    chapter,
+                    user_progress,
+                })
+            })
+            .collect();
+
+        Ok(CourseWithChaptersAndProgress {
+            course,
+            chapters: chapters_with_progress,
+        })
+    }
+
+    pub async fn get_progress_percentage(
+        db: &DbConn,
+        user_id: String,
+        course_id: String,
+    ) -> Result<u8, DbErr> {
+        let published_chapters = Chapter::find()
+            .select_only()
+            .filter(chapter::Column::CourseId.eq(course_id.clone()))
+            .filter(chapter::Column::IsPublished.eq(true))
+            .column(chapter::Column::Id)
+            .into_model::<ChapterId>()
+            .all(db)
+            .await?;
+
+        let published_chapter_ids: Vec<String> = published_chapters
+            .into_iter()
+            .map(|chapter| chapter.id)
+            .collect();
+
+        let valid_completed_chapters = UserProgress::find()
+            .filter(user_progress::Column::UserId.eq(user_id.clone()))
+            .filter(user_progress::Column::ChapterId.is_in(published_chapter_ids.clone()))
+            .filter(user_progress::Column::IsCompleted.eq(true))
+            .count(db)
+            .await?;
+
+        let progress_percentage = if !published_chapter_ids.is_empty() {
+            (valid_completed_chapters as f32 / published_chapter_ids.len() as f32) * 100.0
+        } else {
+            0.0
+        };
+
+        let progress_percentage = progress_percentage.round() as u8;
+
+        Ok(progress_percentage)
     }
 }

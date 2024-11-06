@@ -25,6 +25,7 @@ export const CoursesList = ({
                         <CourseCard
                             key={item.id}
                             id={item.id}
+                            chapterId={item.chapters[0].id}
                             title={item.title}
                             imageUrl={item.imageUrl!}
                             chaptersLength={item.chapters.length}

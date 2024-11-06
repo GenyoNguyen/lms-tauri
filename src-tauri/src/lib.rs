@@ -178,7 +178,18 @@ pub async fn run() {
             create_course,
             update_course,
             add_attachment,
-            remove_attachment
+            remove_attachment,
+            delete_course,
+            publish_course,
+            unpublish_course,
+            get_course,
+            get_course_with_chapters_with_progress,
+            get_progress_percentage,
+            get_chapter,
+            delete_chapter,
+            publish_chapter,
+            unpublish_chapter,
+            update_chapter_progress
         ]) // Đăng ký lệnh clear_history
         .setup(|app| {
             if cfg!(debug_assertions) {

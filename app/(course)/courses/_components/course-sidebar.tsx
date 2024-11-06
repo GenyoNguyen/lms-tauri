@@ -25,12 +25,12 @@ export const CourseSidebar = ({
     // // const { userId } = auth();
     const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     const router = useRouter();
-    const [purchase, setPurchase] = useState<Purchase>();
+    const [purchase, setPurchase] = useState<Purchase | null>();
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         async function fetchPurchase() {
-            invoke<Purchase>("get_purchase", {
+            invoke<Purchase | null>("get_purchase", {
                 userId,
                 courseId: course.id
             }).then(fetchedPurchase => {

@@ -116,13 +116,12 @@ impl OtherRoutes {
         db: &DatabaseConnection,
         user_id: String,
         course_id: String,
-    ) -> Result<purchase::Model, DbErr> {
+    ) -> Result<Option<purchase::Model>, DbErr> {
         let result = purchase::Entity::find()
             .filter(purchase::Column::UserId.eq(user_id)) // Filter by userId
             .filter(purchase::Column::CourseId.eq(course_id)) // Filter by courseId
             .one(db) // Retrieve one record
             .await
-            .unwrap()
             .unwrap();
         Ok(result)
     }

@@ -2,7 +2,10 @@ use std::sync::Arc;
 
 use entities::{attachment, category, course, purchase};
 use serde_json::Value;
-use service::{Courses, DashboardCourses, OtherRoutes, SearchCourseWithProgressWithCategory};
+use service::{
+    ChapterDetails, Chapters, CourseWithChapters, CourseWithChaptersAndProgress, Courses,
+    DashboardCourses, OtherRoutes, SearchCourseWithProgressWithCategory,
+};
 
 use crate::AppState;
 
@@ -24,7 +27,7 @@ pub async fn get_purchase(
     state: tauri::State<'_, Arc<AppState>>,
     user_id: String,
     course_id: String,
-) -> Result<purchase::Model, String> {
+) -> Result<Option<purchase::Model>, String> {
     let db = state.conn.lock().await;
     if let Ok(res) = OtherRoutes::purchase(&db, user_id, course_id).await {
         Ok(res)
@@ -115,5 +118,164 @@ pub async fn remove_attachment(
         Ok(res)
     } else {
         Err("Cannot remove attachment".into())
+    }
+}
+
+#[tauri::command]
+pub async fn delete_course(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+) -> Result<(), String> {
+    let db = state.conn.lock().await;
+    if let Ok(_) = Courses::delete(&db, user_id, course_id).await {
+        Ok(())
+    } else {
+        Err("Cannot delete course".into())
+    }
+}
+
+#[tauri::command]
+pub async fn publish_course(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+) -> Result<(), String> {
+    let db = state.conn.lock().await;
+    if let Ok(_) = Courses::publish(&db, user_id, course_id).await {
+        Ok(())
+    } else {
+        Err("Cannot publish course".into())
+    }
+}
+
+#[tauri::command]
+pub async fn unpublish_course(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+) -> Result<(), String> {
+    let db = state.conn.lock().await;
+    if let Ok(_) = Courses::publish(&db, user_id, course_id).await {
+        Ok(())
+    } else {
+        Err("Cannot unpublish course".into())
+    }
+}
+
+#[tauri::command]
+pub async fn get_course(
+    state: tauri::State<'_, Arc<AppState>>,
+    course_id: String,
+) -> Result<CourseWithChapters, String> {
+    let db = state.conn.lock().await;
+    if let Ok(course) = Courses::get(&db, course_id).await {
+        Ok(course)
+    } else {
+        Err("Cannot get course".into())
+    }
+}
+
+#[tauri::command]
+pub async fn get_course_with_chapters_with_progress(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+) -> Result<CourseWithChaptersAndProgress, String> {
+    let db = state.conn.lock().await;
+    if let Ok(course) = Courses::get_with_chapters_with_progress(&db, user_id, course_id).await {
+        Ok(course)
+    } else {
+        Err("Cannot get course with chapters with progress".into())
+    }
+}
+
+#[tauri::command]
+pub async fn get_progress_percentage(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+) -> Result<u8, String> {
+    let db = state.conn.lock().await;
+    if let Ok(progress_percentage) = Courses::get_progress_percentage(&db, user_id, course_id).await
+    {
+        Ok(progress_percentage)
+    } else {
+        Err("Cannot get progress percentage".into())
+    }
+}
+
+#[tauri::command]
+pub async fn get_chapter(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+    chapter_id: String,
+) -> Result<ChapterDetails, String> {
+    let db = state.conn.lock().await;
+    if let Ok(chapter) = Chapters::get(&db, user_id, course_id, chapter_id).await {
+        Ok(chapter)
+    } else {
+        Err("Cannot get chapter".into())
+    }
+}
+
+#[tauri::command]
+pub async fn delete_chapter(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+    chapter_id: String,
+) -> Result<(), String> {
+    let db = state.conn.lock().await;
+    if let Ok(_) = Chapters::delete(&db, user_id, course_id, chapter_id).await {
+        Ok(())
+    } else {
+        Err("Cannot delete chapter".into())
+    }
+}
+
+#[tauri::command]
+pub async fn publish_chapter(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+    chapter_id: String,
+) -> Result<(), String> {
+    let db = state.conn.lock().await;
+    if let Ok(_) = Chapters::publish(&db, user_id, course_id, chapter_id).await {
+        Ok(())
+    } else {
+        Err("Cannot publish chapter".into())
+    }
+}
+
+#[tauri::command]
+pub async fn unpublish_chapter(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+    chapter_id: String,
+) -> Result<(), String> {
+    let db = state.conn.lock().await;
+    if let Ok(_) = Chapters::unpublish(&db, user_id, course_id, chapter_id).await {
+        Ok(())
+    } else {
+        Err("Cannot publish chapter".into())
+    }
+}
+
+#[tauri::command]
+pub async fn update_chapter_progress(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    chapter_id: String,
+    is_completed: bool,
+) -> Result<(), String> {
+    let db = state.conn.lock().await;
+    if let Ok(_) = Chapters::update_progress(&db, user_id, chapter_id, is_completed).await {
+        Ok(())
+    } else {
+        Err("Cannot update chapter progress".into())
     }
 }

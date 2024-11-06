@@ -1,6 +1,5 @@
 "use client";
 
-import axios from "axios";
 import MuxPlayer from "@mux/mux-player-react";
 import { useState } from "react";
 import { toast } from "react-hot-toast"
@@ -8,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConfettiStore } from "@/hooks/use-confetti-store";
+import { invoke } from "@tauri-apps/api/core";
 
 interface VideoPlayerProps {
     playbackId: string | null | undefined;
@@ -28,32 +28,28 @@ export const VideoPlayer = ({
     completeOnEnd,
     title
 }: VideoPlayerProps) => {
+    const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     const [isReady, setIsReady] = useState(false);
     const router = useRouter();
     const confetti = useConfettiStore();
 
     const onEnd = async () => {
-        try {
-            if (completeOnEnd) {
-                await axios.put(`/api/courses/chapters/progress`, {
-                    chapterId,
-                    isCompleted: true
-                });
-
+        if (completeOnEnd) {
+            invoke("update_chapter_progress", {
+                userId,
+                chapterId,
+                isCompleted: true
+            }).then(() => {
+                toast.success("Progress updated");
                 if (!nextChapterId) {
                     confetti.onOpen();
+                } else {
+                    const searchParams = new URLSearchParams();
+                    searchParams.set("courseId", courseId);
+                    searchParams.set("chapterId", nextChapterId);
+                    router.push(`/courses/chapters?${searchParams.toString()}`);
                 }
-
-                toast.success("Progress updated");
-                router.refresh();
-
-                if (nextChapterId) {
-                    router.push(`/courses/${courseId}/chapters/${nextChapterId}`);
-                    router.refresh();
-                }
-            }
-        } catch {
-            toast.error("Something went wrong");
+            }).catch(err => toast.error(err));
         }
     }
 
