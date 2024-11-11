@@ -158,7 +158,7 @@ pub async fn unpublish_course(
     course_id: String,
 ) -> Result<(), String> {
     let db = state.conn.lock().await;
-    if let Ok(_) = Courses::publish(&db, user_id, course_id).await {
+    if let Ok(_) = Courses::unpublish(&db, user_id, course_id).await {
         Ok(())
     } else {
         Err("Cannot unpublish course".into())
