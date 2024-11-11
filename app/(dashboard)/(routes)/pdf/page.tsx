@@ -6,7 +6,6 @@ import dynamic from 'next/dynamic';
 
 // Dynamically import PdfViewer and ChatbotClient for client-side only
 const PdfViewer = dynamic(() => import('./PDFReader'), { ssr: false });
-const ChatbotClient = dynamic(() => import('./ChatbotClient'), { ssr: false });
 
 const App: React.FC = () => {
   const [isClient, setIsClient] = useState(false);
