@@ -1,17 +1,21 @@
 /* Import Google Font */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
+
 /* Container styles */
-.chatbot-container {
+.main-chatbot-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
   font-family: 'Roboto', sans-serif;
-  background-color: #d3b1e3; /* Xanh tím nhạt */
+  background-color: #dbd1e5; 
+  background-image: url('/bg4.jpg');
+  background-size: cover;  /* Để hình nền phủ đầy */
+  background-position: center;  /* Đặt hình nền ở giữa */
 }
 
 /* Header styles */
-.chat-header {
+.main-chat-header {
   background-color: #6a0dad; /* Xanh tím đậm */
   padding: 15px;
   color: white;
@@ -19,14 +23,14 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.chat-header h1 {
+.main-chat-header h1 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
 }
 
 /* Background selector styles */
-.background-selector {
+.main-background-selector {
   display: flex;
   align-items: center;
   padding: 10px 20px;
@@ -34,17 +38,17 @@
   border-bottom: 1px solid #e0e0e0;
 }
 
-.background-selector span {
+.main-background-selector span {
   margin-right: 10px;
   font-weight: 500;
 }
 
-.background-options {
+.main-background-options {
   display: flex;
   gap: 10px;
 }
 
-.background-button {
+.main-background-button {
   width: 40px;
   height: 40px;
   border: 2px solid transparent;
@@ -55,16 +59,16 @@
   transition: all 0.2s ease;
 }
 
-.background-button:hover {
+.main-background-button:hover {
   transform: scale(1.1);
 }
 
-.background-button.selected {
+.main-background-button.main-selected {
   border-color: #6a0dad; /* Xanh tím đậm */
 }
 
 /* Chat history styles */
-.chat-history {
+.main-chat-history {
   flex: 1;
   padding: 20px;
   padding-bottom: 150px; /* Đủ chỗ cho chiều cao của chat-input-container */
@@ -77,17 +81,17 @@
 }
 
 /* Message styles */
-.chat-message {
+.main-chat-message {
   display: flex;
   margin-bottom: 15px;
   transition: all 0.3s ease;
 }
 
-.chat-message.user {
+.main-chat-message.main-user {
   justify-content: flex-end;
 }
 
-.message-content {
+.main-message-content {
   max-width: 70%;
   padding: 12px 16px;
   border-radius: 20px;
@@ -97,21 +101,21 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.chat-message.user .message-content {
-  background-color: #6a0dad; /* Xanh tím đậm */
-  color: white;
+.main-chat-message.main-user .main-message-content {
+  background-color: #2d7eb4; /* Xanh tím đậm */
+  color: rgb(255, 255, 255);
   border-bottom-right-radius: 4px;
   margin-left: 50px;
 }
 
-.chat-message.bot .message-content {
-  background-color: #f3f0ff; /* Xanh tím nhạt */
-  color: #333;
+.main-chat-message.main-bot .main-message-content {
+  background-color: #074733; /* Xanh tím nhạt */
+  color: #f6f1f1;
   border-bottom-left-radius: 4px;
   margin-right: 50px;
 }
 
-.message-timestamp {
+.main-message-timestamp {
   font-size: 0.7rem;
   opacity: 0.7;
   position: absolute;
@@ -120,18 +124,18 @@
 }
 
 /* Chat input styles */
-.chat-input-container {
+.main-chat-input-container {
   display: flex;
   padding: 15px;
   background-color: white;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.main-1);
   position: fixed;
   gap: 10px;
   bottom: 0;
   width: 86%;
 }
 
-.chat-input {
+.main-chat-input {
   flex: 1;
   padding: 12px 20px; 
   font-size: 16px;
@@ -141,14 +145,14 @@
   transition: all 0.3s ease;
 }
 
-.chat-input:focus {
+.main-chat-input:focus {
   outline: none;
   border-color: #6a0dad; /* Xanh tím đậm */
   background-color: white;
   box-shadow: 0 0 0 3px rgba(106, 13, 173, 0.1); /* Xanh tím nhạt */
 }
 
-.send-button {
+.main-send-button {
   padding: 0 25px;
   font-size: 16px;
   font-weight: 600;
@@ -160,31 +164,27 @@
   transition: all 0.2s ease;
 }
 
-.send-button:hover:not(.disabled) {
+.main-send-button:hover:not(.main-disabled) {
   background-color: #4b0b8a; /* Xanh tím đậm hơn */
   transform: translateY(-1px);
 }
-
-.send-button.disabled {
+.message-content.main-typing-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px; /* Khoảng cách giữa các dấu chấm */
+}
+.main-send-button.main-disabled {
   background-color: #cccccc;
   cursor: not-allowed;
   opacity: 0.7;
 }
 
-/* Typing indicator styles */
-.typing-indicator {
-  display: flex;
-  align-items: center;
-  background-color: white;
-  padding: 12px 16px;
-  border-radius: 20px;
-  width: 60px;
-}
 
-.typing-dot {
+.main-typing-dot {
   height: 8px;
   width: 8px;
-  background-color: #6a0dad; /* Xanh tím đậm */
+  background-color: #2caa1c; /* Xanh tím đậm */
   border-radius: 50%;
   margin: 0 2px;
   opacity: 0.4;
@@ -197,16 +197,16 @@
   44% { transform: translateY(0px); }
 }
 
-.typing-dot:nth-child(1) { animation-delay: 200ms; }
-.typing-dot:nth-child(2) { animation-delay: 300ms; }
-.typing-dot:nth-child(3) { animation-delay: 400ms; }
+.main-typing-dot:nth-child(1) { animation-delay: 200ms; }
+.main-typing-dot:nth-child(2) { animation-delay: 300ms; }
+.main-typing-dot:nth-child(3) { animation-delay: 400ms; }
 
 /* Success and error feedback animations */
-.success-flash {
+.main-success-flash {
   animation: successPulse 1s ease;
 }
 
-.error-flash {
+.main-error-flash {
   animation: errorPulse 1s ease;
 }
 
@@ -223,35 +223,35 @@
 }
 
 /* Scrollbar styling */
-.chat-history::-webkit-scrollbar {
+.main-chat-history::-webkit-scrollbar {
   width: 6px;
 }
 
-.chat-history::-webkit-scrollbar-track {
+.main-chat-history::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.1);
 }
 
-.chat-history::-webkit-scrollbar-thumb {
+.main-chat-history::-webkit-scrollbar-thumb {
   background: rgba(106, 13, 173, 0.2); /* Xanh tím nhạt */
   border-radius: 3px;
 }
 
-.chat-history::-webkit-scrollbar-thumb:hover {
+.main-chat-history::-webkit-scrollbar-thumb:hover {
   background: rgba(106, 13, 173, 0.3); /* Xanh tím đậm hơn */
 }
 
 /* Message hover effect */
-.chat-message:hover .message-content {
+.main-chat-message:hover .main-message-content {
   transform: translateY(-1px);
   box-shadow: 0 2px 5px rgba(106, 13, 173, 0.3); /* Xanh tím nhạt */
 }
-.chatbot-controls {
+.main-chatbot-controls {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 10px;
 }
 
-.reset-button {
+.main-reset-button {
   background-color: #ff4d4d;
   color: white;
   border: none;
@@ -260,11 +260,11 @@
   cursor: pointer;
 }
 
-.reset-button:hover {
+.main-reset-button:hover {
   background-color: #ff3333;
 }
 /* Settings Controls Container */
-.chatbot-controls {
+.main-chatbot-controls {
   position: fixed; /* Thay đổi từ absolute sang fixed */
   top: 25px;
   left: 250px;
@@ -272,7 +272,7 @@
 }
 
 /* Settings Button */
-.settings-button {
+.main-settings-button {
   background-color: rgba(255, 255, 255, 0.9);
   border: 1px solid #e1e1e1;
   border-radius: 8px;
@@ -287,14 +287,14 @@
   backdrop-filter: blur(5px);
 }
 
-.settings-button:hover {
+.main-settings-button:hover {
   background-color: rgba(255, 255, 255, 1);
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Settings Menu - Centered */
-.settings-menu {
+.main-settings-menu {
   position: fixed;
   top: 50%;
   left: 55%;
@@ -310,7 +310,7 @@
 }
 
 /* Overlay backdrop */
-.settings-overlay {
+.main-settings-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -343,7 +343,7 @@
 }
 
 /* Reset Button */
-.reset-button {
+.main-reset-button {
   width: 100%;
   padding: 12px;
   background-color: #ff4757;
@@ -356,17 +356,17 @@
   margin-bottom: 16px;
 }
 
-.reset-button:hover {
+.main-reset-button:hover {
   background-color: #ff6b81;
   transform: translateY(-1px);
 }
 
 /* Background Selector */
-.background-selector {
+.main-background-selector {
   margin-top: 16px;
 }
 
-.background-selector span {
+.main-background-selector span {
   display: block;
   margin-bottom: 10px;
   color: #333;
@@ -374,14 +374,14 @@
   font-weight: 500;
 }
 
-.background-options {
+.main-background-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-top: 8px;
 }
 
-.background-button {
+.main-background-button {
   width: 80px;
   height: 80px;
   border-radius: 8px;
@@ -392,18 +392,18 @@
   border: 2px solid transparent;
 }
 
-.background-button:hover {
+.main-background-button:hover {
   transform: scale(1.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.background-button.selected {
+.main-background-button.main-selected {
   transform: scale(1.05);
   box-shadow: 0 0 0 2px #0084ff, 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Close button for settings menu */
-.settings-close {
+.main-settings-close {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -417,100 +417,174 @@
   transition: all 0.2s ease;
 }
 
-.settings-close:hover {
+.main-settings-close:hover {
   color: #333;
   transform: scale(1.1);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .settings-menu {
+  .main-settings-menu {
     min-width: 90%;
     max-width: 95%;
     padding: 16px;
   }
   
-  .background-options {
+  .main-background-options {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .background-button {
+  .main-background-button {
     width: 100%;
     height: 70px;
   }
 }
 /* Dark mode styling */
-.chatbot-container.dark {
+.main-chatbot-container.main-dark {
   background-color: #1e1e2f; /* Nền tối */
   color: #e4e4e7; /* Màu chữ sáng hơn */
 }
 
-.chatbot-container.dark .chat-header {
+.main-chatbot-container.main-dark .main-chat-header {
   background-color: #333; /* Nền header tối hơn */
 }
 
-.chatbot-container.dark .background-selector,
-.chatbot-container.dark .chat-input-container {
+.main-chatbot-container.main-dark .main-background-selector,
+.main-chatbot-container.main-dark .main-chat-input-container {
   background-color: #2a2a3b;
 }
 
-.chatbot-container.dark .send-button {
-  background-color: #4b0b8a; /* Màu nút gửi phù hợp với nền tối */
+.main-chatbot-container.main-dark .main-send-button {
+  background-color: #071d64; /* Màu nút gửi phù hợp với nền tối */
 }
 
-.chatbot-container.dark .message-content {
-  background-color: #3a3a4b;
+.main-chatbot-container.main-dark .main-message-content {
+  background-color: #080449;
   color: #e4e4e7;
 }
 
-.chatbot-container.dark .message-content.bot {
-  background-color: #2d2d3a;
+.main-chatbot-container.main-dark .main-message-content.main-bot {
+  background-color: #360654;
 }
 
-.chatbot-container.dark .settings-menu {
+.main-chatbot-container.main-dark .main-settings-menu {
   background-color: rgba(45, 45, 58, 0.95);
   color: #e4e4e7;
 }
 
-.chatbot-container.dark .background-button.selected {
+.main-chatbot-container.main-dark .main-background-button.main-selected {
   box-shadow: 0 0 0 2px #0084ff, 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
-.chatbot-container.dark .typing-dot {
-  background-color: #6a0dad; /* Giữ màu xanh tím đậm cho chế độ tối */
+.main-chatbot-container.main-dark .main-typing-dot {
+  background-color: #99e6e4; /* Giữ màu xanh tím đậm cho chế độ tối */
 }
-.chatbot-container.dark .settings-button:hover {
+.main-chatbot-container.main-dark .main-settings-button:hover {
   background-color: rgba(60, 60, 70, 1);
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.chatbot-container.dark .reset-button:hover {
+.main-chatbot-container.main-dark .main-reset-button:hover {
   background-color: #ff6b81;
   transform: translateY(-1px);
 }
-.chatbot-container.dark .send-button {
+.main-chatbot-container.main-dark .main-send-button {
   background-color: #6a0dad;
   color: white;
 }
 
-.chatbot-container.dark .send-button.disabled {
+.main-chatbot-container.main-dark .main-send-button.main-disabled {
   background-color: #555;
   color: #888;
   cursor: not-allowed;
 }
-.chatbot-container.dark .typing-dot {
+.main-chatbot-container.main-dark .main-typing-dot {
   background-color: #9b72d1; /* Màu sáng hơn cho dark mode */
 }
-.chatbot-container.dark .chat-input {
+.main-chatbot-container.main-dark .main-chat-input {
   background-color: #2a2a3b; /* Nền tối hơn */
   color: #e4e4e7; /* Màu chữ sáng hơn */
   border-color: #d9e16a; /* Viền màu xanh tím đậm */
 }
 
-.chatbot-container.dark .chat-input::placeholder {
+.main-chatbot-container.main-dark .main-chat-input::placeholder {
   color: #888; /* Màu chữ nhạt hơn cho placeholder */
 }
-.chatbot-container.dark .background-selector span {
+.main-chatbot-container.main-dark .main-background-selector span {
   color: #e4e4e7; /* Màu chữ sáng hơn trong dark mode */
+}
+.welcome-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.welcome-modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  max-width: 500px;
+}
+
+.welcome-modal-content h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.welcome-modal-content p {
+  margin-bottom: 1.5rem;
+}
+
+.close-modal-button {
+  background: #0084ff;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.close-modal-button:hover {
+  background: #005bb5;
+}
+.main-message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  margin: 10px;
+}
+
+.main-user .main-message-avatar {
+  order: 1;
+}
+
+.main-bot .main-message-avatar {
+  order: -1;
+}
+.main-welcome-message {
+  position: absolute;
+  top: 40%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.main-dark .main-welcome-message {
+  color: white;
 }

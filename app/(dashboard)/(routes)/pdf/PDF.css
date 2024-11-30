@@ -1,12 +1,149 @@
+/* Fade-in animation */
 @keyframes fade-in {
-    0% {
-      opacity: 0;
-    }
-    100% {
-      opacity: 1;
-    }
+  0% {
+    opacity: 0;
   }
-  
-  .animate-fade-in {
-    animation: fade-in 0.5s ease-out forwards;
+  100% {
+    opacity: 1;
   }
+}
+
+/* Container cho PDF Viewer */
+.pdf-container {
+  position: relative;
+  display: block;
+  max-width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  animation: fade-in 0.3s ease-in-out; /* Thêm hiệu ứng fade-in cho container */
+}
+
+/* Canvas PDF */
+.pdf-canvas {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+}
+
+/* Text Layer: lớp chứa văn bản của PDF */
+.textLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  opacity: 2;
+  line-height: 1.2;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  z-index: 2;
+  pointer-events: none; /* Đảm bảo văn bản không can thiệp vào các sự kiện chuột */
+  animation: fade-in 0.5s ease-in-out; /* Thêm hiệu ứng fade-in cho text layer */
+}
+
+/* Cải tiến văn bản PDF */
+.textLayer > span {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+  transition: background-color 0.2s ease-in-out; /* Hiệu ứng mượt mà khi highlight */
+}
+
+/* Highlight: Đánh dấu văn bản */
+.textLayer .highlight {
+  margin: -1px;
+  padding: 1px;
+  background-color: rgb(180, 0, 170);
+  border-radius: 4px;
+  transition: background-color 0.2s ease-in-out; /* Thêm hiệu ứng mượt mà khi chọn */
+}
+
+/* Highlight đã được chọn */
+.textLayer .highlight.selected {
+  background-color: rgb(0, 100, 0);
+}
+
+/* Thay đổi màu khi chọn văn bản */
+.textLayer ::selection {
+  background: rgba(0, 0, 255, 0.3);
+}
+
+/* Đảm bảo container PDF có thể cuộn */
+.webviewer {
+  overflow: auto !important;
+  max-height: 100vh; /* Giới hạn chiều cao để tránh kéo dài vô hạn */
+}
+
+/* Đảm bảo văn bản phù hợp với tỉ lệ */
+.pdf-container {
+  transform-origin: top left;
+  display: block;
+  position: relative;
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+}
+
+/* Nút cuộn: Đảm bảo điều hướng dễ dàng với các nút ở đầu và cuối */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button {
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+/* Các nút điều khiển PDF như zoom, chuyển trang */
+.control-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.control-buttons button {
+  padding: 10px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.control-buttons button:hover {
+  background-color: #0056b3;
+}
+
+/* Styling cho các input kiểu số và văn bản */
+input[type="number"] {
+  width: 60px;
+  text-align: center;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  transition: border 0.3s;
+}
+
+input[type="number"]:focus {
+  border-color: #007BFF;
+}
+
+input[type="number"]:disabled {
+  background-color: #f5f5f5;
+}
