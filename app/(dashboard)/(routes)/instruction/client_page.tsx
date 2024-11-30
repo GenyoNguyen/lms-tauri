@@ -134,7 +134,7 @@ const InstructionContent = () => {
             <div className="page">
               {/* Trang 1 */}
               <Card className={`max-w-4xl mx-auto shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${isDark ? 'bg-gray-900 text-gray-100' : 'bg-white'}`}>
-                <CardHeader className="text-center relative overflow-hidden">
+                <CardHeader className="text-center relative overflow-auto">
                   <CardTitle className={`text-4xl font-bold bg-gradient-to-r ${isDark ? 'from-purple-400 to-pink-400' : 'from-purple-600 to-pink-600'} bg-clip-text text-transparent animate-pulse`}>
                     Hướng Dẫn Sử Dụng Trợ Lý Ảo
                   </CardTitle>
@@ -274,7 +274,7 @@ const InstructionContent = () => {
                   </div>
                 </CardContent>
                 <div className="text-center mt-4">
-                  <Button onClick={handleNextPage} className="mt-4 flex items-center justify-center mx-auto text-lg font-semibold px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                  <Button onClick={handleNextPage} className="mt-4 mb-10 flex items-center justify-center mx-auto text-lg font-semibold px-6 py-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
                     Tiếp Theo
                     <ArrowRight className="w-6 h-6 ml-2" />
                   </Button>
@@ -347,7 +347,7 @@ const InstructionContent = () => {
                   </div>
                 </CardContent>
                 <div className="text-center mt-4">
-                  <Button onClick={handlePreviousPage} className="mt-4 flex items-center justify-center mx-auto text-lg font-semibold px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                  <Button onClick={handlePreviousPage} className="mt-4 mb-10 flex items-center justify-center mx-auto text-lg font-semibold px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
                     <ArrowLeft className="w-6 h-6 mr-2" />
                     Quay Lại
                   </Button>

@@ -2,10 +2,10 @@
 import { useState, useEffect, useRef, useContext } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import ReactMarkdown from 'react-markdown';
-import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
+import { motion, AnimatePresence} from 'framer-motion';
 import { Minimize2, Maximize2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
-import './Chatbot.css';
+import './chatbot.css';
 import { ThemeContext } from "../../ThemeContext";
 
 interface Message {
@@ -18,13 +18,11 @@ interface Message {
 const backgroundImages = [
   '/bg1.png',
   '/bg2.png',
-  '/bg3.png',
+  '/bg3.jpg',
 ];
 
-const ChatbotClient = () => {
+const ChatbotClient2 = () => {
   const { isDark } = useContext(ThemeContext);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
   const [dragConstraints, setDragConstraints] = useState({
     left: -20,
     right: 20,
@@ -35,8 +33,7 @@ const ChatbotClient = () => {
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [typingText, setTypingText] = useState('');
   const [isBotTyping, setIsBotTyping] = useState(false);
-  const [isInputEmpty, setIsInputEmpty] = useState(true);
-  const [backgroundImage, setBackgroundImage] = useState<string>('bg3.png');
+  const [backgroundImage, setBackgroundImage] = useState<string>('bg3.jpg');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [width, setWidth] = useState(400); // Default width
@@ -75,7 +72,6 @@ const ChatbotClient = () => {
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
   };
-
   const handleSendMessage = async () => {
     if (input.trim() === '') return;
 
@@ -89,13 +85,13 @@ const ChatbotClient = () => {
     setChatHistory(prev => [...prev, userMessage]);
     const userInput = input;
     setInput('');
-    setIsInputEmpty(true);
 
     try {
       setIsBotTyping(true);
       const result = await invoke<string>('generate_text', {
         prompt: userInput,
         sampleLen: 400,
+        style: false,
       });
       startTypingEffect(result);
     } catch (error) {
@@ -120,7 +116,7 @@ const ChatbotClient = () => {
       if (index < words.length) {
         setTypingText(prev => (prev + ' ' + words[index]).trim());
         index++;
-        setTimeout(typeWord, 200); // Delay for word-by-word effect
+        setTimeout(typeWord, 1); // Delay for word-by-word effect
       } else {
         const botMessage: Message = {
           id: `bot-${Date.now()}`,
@@ -141,7 +137,6 @@ const ChatbotClient = () => {
     const value = e.target.value;
     if (value.length > 500) return;
     setInput(value);
-    setIsInputEmpty(value.trim() === '');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -155,21 +150,13 @@ const ChatbotClient = () => {
     setBackgroundImage(image);
   };
 
-  const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setWidth(Number(e.target.value));
-  };
-
-  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setHeight(Number(e.target.value));
-  };
 
   const handleReset = async () => {
     setChatHistory([]);
     setInput('');
     setTypingText('');
     setIsBotTyping(false);
-    setIsInputEmpty(true);
-    setBackgroundImage('bg3.png');
+    setBackgroundImage('bg3.jpg');
     try {
       await invoke('clear_history');
       console.log('Chat history cleared successfully');
@@ -187,14 +174,14 @@ const ChatbotClient = () => {
       dragElastic={0.1}
       dragConstraints={dragConstraints}
       style={{
-        x,
-        y,
-        width: `${width}px`,
+        x: 0,
+        y: 0,
+        width: isMinimized ? '60px': `${width}px`,
         height: isMinimized ? '60px' : `${height}px`,
         position: 'fixed',
         zIndex: 1000,
         touchAction: 'none',
-        backgroundImage: backgroundImage ? `url(${backgroundImage})` : 'none',
+        backgroundImage: backgroundImage ? `url(${backgroundImage})` : `url(bg3.jpg)`,
         backgroundSize: 'cover',
         display: 'flex',
         flexDirection: 'column',
@@ -205,6 +192,7 @@ const ChatbotClient = () => {
         damping: 25,
       }}
     >
+      {/* Header */}
       <div className={cn("chatbot-header", isDark ? "dark-header" : "light-header")}>
         <div className="header-title">{isMinimized ? "Chat" : "Chatbot"}</div>
         <div className="header-controls">
@@ -217,6 +205,7 @@ const ChatbotClient = () => {
         </div>
       </div>
 
+      {/* Chat content */}
       <AnimatePresence>
         {!isMinimized && (
           <motion.div
@@ -245,11 +234,11 @@ const ChatbotClient = () => {
 
                 <div className="width-selector">
                   <span>Adjust width:</span>
-                  <input type="range" min="300" max="600" value={width} onChange={handleWidthChange} />
+                  <input type="range" min="300" max="600" value={width} onChange={(e) => setWidth(Number(e.target.value))} />
                 </div>
                 <div className="height-selector">
                   <span>Adjust height:</span>
-                  <input type="range" min="300" max="800" value={height} onChange={handleHeightChange} />
+                  <input type="range" min="300" max="800" value={height} onChange={(e) => setHeight(Number(e.target.value))} />
                 </div>
               </div>
             )}
@@ -271,12 +260,38 @@ const ChatbotClient = () => {
         )}
       </AnimatePresence>
 
+      {/* Chat input */}
       <motion.div className="chat-input-container">
         <input ref={inputRef} type="text" value={input} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Type your message here..." className="chat-input" />
-        <motion.button onClick={handleSendMessage} className={cn("send-button", isInputEmpty && "disabled")} disabled={isInputEmpty}>Send</motion.button>
+        <motion.button onClick={handleSendMessage} className={cn("send-button", input === '' && "disabled")} disabled={input === ''}>Send</motion.button>
       </motion.div>
+
+      {/* Chat bubble for minimized mode */}
+      {isMinimized && (
+        <motion.div
+          className="chat-bubble"
+          onClick={toggleMinimize}
+          style={{
+            position: 'absolute',
+            bottom: '0px',
+            right: '0px',
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#63cedc',
+            borderRadius: '50%',
+            color: '#fff',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            cursor: 'pointer',
+            zIndex: 1001,
+          }}
+        >
+          <span style={{ fontSize: '24px' }}>💬</span>
+        </motion.div>
+      )}
     </motion.div>
   );
 };
 
-export default ChatbotClient;
+export default ChatbotClient2;
