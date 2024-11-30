@@ -61,9 +61,9 @@ impl TextGeneration {
     ) -> Result<String, Error> {
         println!("Starting inference with prompt: {}", prompt);
         println!("Using device: {:?}", self.device);
-        
+
         let mut inference = String::new();
-    
+
         // Bước 1: Xóa các token cũ trong tokenizer
         self.tokenizer.clear();
         let mut tokens = self
@@ -74,7 +74,7 @@ impl TextGeneration {
             .get_ids()
             .to_vec();
         println!("Initial tokens from prompt: {:?}", tokens);
-    
+
         let mut generated_tokens = 0usize;
         let eos_token = match self.tokenizer.get_token("</s>") {
             Some(token) => token,
@@ -83,7 +83,7 @@ impl TextGeneration {
                 return Err(Error::msg("Cannot find eos token - </s>".to_string()));
             }
         };
-    
+
         println!("\n> Generating tokens");
         let start_gen = std::time::Instant::now();
         for index in 0..sample_len {
@@ -92,16 +92,16 @@ impl TextGeneration {
             let start_pos = tokens.len().saturating_sub(context_size);
             let context = &tokens[start_pos..];
             println!("Context tokens (step {}): {:?}", index, context);
-    
+
             // Bước 3: Tạo tensor đầu vào từ ngữ cảnh
             let input = Tensor::new(context, &self.device)?.unsqueeze(0)?;
-            println!("Tensor device: {:?}", input.device()); 
-    
+            println!("Tensor device: {:?}", input.device());
+
             // Bước 4: Suy luận (forward pass)
             let logits = &mut self.model.forward(&input, start_pos)?;
             let logits = logits.squeeze(0)?.squeeze(0)?;
             println!("Logits after forward pass (step {}): {:?}", index, logits);
-    
+
             // Bước 5: Áp dụng repeat penalty nếu có
             let logits = if self.repeat_penalty == 1. {
                 logits
@@ -114,20 +114,20 @@ impl TextGeneration {
                     &tokens[start_at..],
                 )?
             };
-    
+
             // Bước 6: Chọn token tiếp theo
             let next_token = self.logits_processor.sample(&logits)?;
             println!("Next token (step {}): {:?}", index, next_token);
             tokens.push(next_token);
             generated_tokens += 1;
-    
+
             // Kiểm tra nếu token là end-of-sequence (kết thúc)
             if next_token == eos_token {
                 println!("EOS token: {:?}", eos_token);
                 println!("End-of-sequence token reached at step {}", index);
                 break;
             }
-    
+
             // Chuyển token thành từ và gửi qua channel
             if let Some(t) = self.tokenizer.next_token(next_token)? {
                 println!("Generated token text (step {}): {}", index, t);
@@ -136,27 +136,22 @@ impl TextGeneration {
                 println!("Token sent successfully for step {}", index);
             }
         }
-    
+
         // Tính thời gian và in kết quả
         let dt = start_gen.elapsed();
-        if let Some(rest) = self
-            .tokenizer
-            .decode_rest()
-            .map_err(|e| Error::msg(e))?
-        {
+        if let Some(rest) = self.tokenizer.decode_rest().map_err(|e| Error::msg(e))? {
             println!("Remaining text after decoding: {}", rest);
             inference.push_str(&rest);
             tx.send(rest).await.expect("Issue sending on channel");
         }
-    
+
         println!(
             "> {} tokens generated ({:.2} tokens/s)",
             generated_tokens,
             generated_tokens as f64 / dt.as_secs_f64(),
         );
-    
+
         println!("Final generated text: {}", inference);
         Ok(inference)
     }
-    
 }

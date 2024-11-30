@@ -21,6 +21,21 @@ pub struct TeacherChapterWithMuxData {
     mux_data: Option<mux_data::Model>,
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TeacherCourseData {
+    name: String,
+    total: i64,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TeacherAnalytics {
+    data: Vec<TeacherCourseData>,
+    total_revenue: i64,
+    total_sales: i64,
+}
+
 impl Teacher {
     pub async fn course(
         db: &DbConn,
@@ -83,5 +98,56 @@ impl Teacher {
             .await?;
 
         Ok(TeacherChapterWithMuxData { chapter, mux_data })
+    }
+
+    pub async fn analytics(db: &DbConn, user_id: String) -> Result<TeacherAnalytics, DbErr> {
+        let purchases = Purchase::find()
+            .filter(purchase::Column::UserId.eq(user_id.clone()))
+            .all(db)
+            .await?;
+
+        if purchases.len() == 0 {
+            return Ok(TeacherAnalytics {
+                data: vec![],
+                total_revenue: 0,
+                total_sales: 0,
+            });
+        }
+
+        let mut data: Vec<TeacherCourseData> = Vec::new();
+        let mut total_revenue: i64 = 0;
+        let total_sales: i64 = purchases.len() as i64;
+
+        for purchase in purchases {
+            let course = course::Entity::find_by_id(purchase.course_id.clone())
+                .one(db)
+                .await?;
+
+            let course_names: Vec<String> = data.iter().map(|c| c.name.clone()).collect();
+
+            if let Some(course) = course {
+                if !course_names.contains(&course.title) {
+                    data.push(TeacherCourseData {
+                        name: course.title.to_string(),
+                        total: 0,
+                    });
+                }
+                data.iter_mut()
+                    .map(|d| {
+                        if d.name == course.title.to_string() {
+                            d.total += course.price.unwrap();
+                        }
+                    })
+                    .count();
+
+                total_revenue += course.price.unwrap();
+            }
+        }
+
+        Ok(TeacherAnalytics {
+            data: data,
+            total_revenue: total_revenue,
+            total_sales: total_sales,
+        })
     }
 }

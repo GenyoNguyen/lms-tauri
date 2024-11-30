@@ -9,7 +9,9 @@ import toast from "react-hot-toast";
 
 import { Course } from "@prisma/client";
 import Image from "next/image";
-import { FileUpload } from "@/components/file-upload";
+
+
+import { CldUploadWidget } from 'next-cloudinary';
 import { invoke } from "@tauri-apps/api/core";
 
 interface ImageFormProps {
@@ -31,42 +33,59 @@ export const ImageForm = ({
     const [isEditting, setIsEditting] = useState(false);
     const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || "");
 
-    const toggleEdit = () => setIsEditting((current) => !current);
-
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        console.log(courseId);
-
-        invoke("update_course", {
-            courseId,
-            updates: values
-        }).then(() => {
-            toast.success("Course updated");
-            toggleEdit();
-            setImageUrl(values.imageUrl);
-        }).catch(err => toast.error(err));
-    }
-
     return (
         <div className="mt-6 border bg-slate-100 rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
                 Course Image
-                <Button onClick={toggleEdit} variant="ghost">
-                    {isEditting && (
-                        <>Cancel</>
-                    )}
-                    {!isEditting && !imageUrl && (
-                        <>
-                            <PlusCircle className="h-4 w-4 mr-2"/>
-                            Add an image
-                        </>
-                    )}
-                    {!isEditting && imageUrl && (
-                        <>
-                        <Pencil className="h-4 w-4 mr-2"/>
-                        Edit image
-                        </>
-                    )}
-                </Button>
+
+                <CldUploadWidget
+                    options={{
+                        resourceType: "image"
+                    }}
+                    uploadPreset="ml_default"
+                    onClose={() => {
+                        setIsEditting(false);
+                    }}
+                    onSuccess={(result) => {
+
+                        invoke("update_course", {
+                            courseId,
+                            updates: {"imageUrl": result.info.url}
+                        }).then(() => {
+                            toast.success("Course updated");
+                            setImageUrl(result.info.url);
+                            setIsEditting(false);
+                        }).catch(err => toast.error(err));
+
+                    }}
+                    onQueuesEnd={(result, { widget }) => {
+                        widget.close();
+                    }}
+                    >
+                    {({ open }) => {
+                        function handleOnClick() {
+                            setIsEditting(true);
+                            open();
+                        }
+
+                        if (imageUrl) {
+                            return (
+                                <Button onClick={handleOnClick} variant="ghost">
+                                    <Pencil className="h-4 w-4 mr-2"/>
+                                    Edit image
+                                </Button>
+                            );
+                        }
+
+                        return (
+                            <Button onClick={handleOnClick} variant="ghost">
+                                <PlusCircle className="h-4 w-4 mr-2"/>
+                                Add an image
+                            </Button>
+                        );
+                    }}
+                </CldUploadWidget>
+
             </div>
             {!isEditting && (
                 !imageUrl ? (
@@ -85,21 +104,7 @@ export const ImageForm = ({
                 )
             )}
             {isEditting && (
-                <div>
-                    <FileUpload
-                        endpoint="courseImage"
-                        onChange={(url) => {
-                            console.log(url);
-                            console.log("Lmao");
-                            if (url) {
-                                onSubmit({ imageUrl: url });
-                            }
-                        }}
-                    />
-                    <div className="text-xs text-muted-foreground mt-4">
-                        16:9 aspect ratio reccommended
-                    </div>
-                </div>
+                <div>Uploading...</div>
             )}
         </div>
     )

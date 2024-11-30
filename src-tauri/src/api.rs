@@ -6,7 +6,7 @@ use serde_json::Value;
 use service::{
     ChapterDetails, Chapters, CourseWithChapters, CourseWithChaptersAndProgress, Courses,
     DashboardCourses, OtherRoutes, ReorderData, SearchCourseWithProgressWithCategory, Teacher,
-    TeacherChapterWithMuxData, TeacherCourse,
+    TeacherAnalytics, TeacherChapterWithMuxData, TeacherCourse,
 };
 
 use crate::AppState;
@@ -358,5 +358,17 @@ pub async fn get_teacher_chapter(
         Ok(coruse) => Ok(coruse),
         Err(DbErr::RecordNotFound(err)) => Err(err),
         _ => Err("Cannot get teacher course".into()),
+    }
+}
+
+#[tauri::command]
+pub async fn get_teacher_analytics(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+) -> Result<TeacherAnalytics, String> {
+    let db = state.conn.lock().await;
+    match Teacher::analytics(&db, user_id).await {
+        Ok(analytics) => Ok(analytics),
+        _ => Err("Cannot get teacher analytics".into()),
     }
 }

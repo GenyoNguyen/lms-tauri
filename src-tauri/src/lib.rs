@@ -166,6 +166,7 @@ pub async fn run() {
     });
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_upload::init())
         .manage(state)
         .invoke_handler(tauri::generate_handler![
             greet,
@@ -194,7 +195,8 @@ pub async fn run() {
             create_chapter,
             update_chapter,
             get_teacher_course,
-            get_teacher_chapter
+            get_teacher_chapter,
+            get_teacher_analytics
         ]) // Đăng ký lệnh clear_history
         .setup(|app| {
             if cfg!(debug_assertions) {
