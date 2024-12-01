@@ -99,7 +99,7 @@ async fn generate_text(
     }
 
     // Lấy đối tượng TextGeneration đã tải
-    let textgen = state
+    let _textgen = state
         .textgen
         .lock()
         .await
@@ -216,6 +216,7 @@ pub async fn run() {
             get_search,
             create_course,
             update_course,
+            list_courses,
             add_attachment,
             remove_attachment,
             delete_course,

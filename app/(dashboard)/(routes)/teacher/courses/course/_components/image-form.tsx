@@ -40,14 +40,13 @@ export const ImageForm = ({
 
                 <CldUploadWidget
                     options={{
-                        resourceType: "image"
+                        clientAllowedFormats: ["jpg", "png", "webp"]
                     }}
                     uploadPreset="ml_default"
                     onClose={() => {
                         setIsEditting(false);
                     }}
                     onSuccess={(result) => {
-
                         invoke("update_course", {
                             courseId,
                             updates: {"imageUrl": result.info.url}

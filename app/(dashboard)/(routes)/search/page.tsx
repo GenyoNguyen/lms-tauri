@@ -2,22 +2,20 @@
 
 import { Categories } from "./_components/categories";
 import { SearchInput } from "@/components/search-input";
-import { CourseWithProgressWithCategory } from "@/actions/get-courses";
 
 import { redirect, useSearchParams } from "next/navigation";
 import { CoursesList } from "@/components/courses-list";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
-import { Category } from "@prisma/client";
+import { Category, Course } from "@prisma/client";
 import toast from "react-hot-toast";
 
-// interface SearchPageProps {
-//     searchParams: {
-//         title: string;
-//         categoryId: string;
-//     }
-// };
+type CourseWithProgressWithCategory = Course & {
+    category: Category | null;
+    chapters: { id: string }[];
+    progress: number | null
+};
 
 const SearchPage = () => {
     const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";

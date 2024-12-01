@@ -13,8 +13,8 @@ pub struct Model {
     pub title: String,
     #[sea_orm(column_type = "Text", nullable)]
     pub description: Option<String>,
-    #[sea_orm(column_name = "videoUrl", column_type = "Text", nullable)]
-    pub video_url: Option<String>,
+    #[sea_orm(column_name = "videoId", column_type = "Text", nullable)]
+    pub video_id: Option<String>,
     pub position: i32,
     #[sea_orm(column_name = "isPublished", default_value = false)]
     pub is_published: bool,
@@ -38,8 +38,6 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Course,
-    #[sea_orm(has_one = "super::mux_data::Entity")]
-    MuxData,
     #[sea_orm(has_many = "super::user_progress::Entity")]
     UserProgress,
 }
@@ -47,12 +45,6 @@ pub enum Relation {
 impl Related<super::course::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Course.def()
-    }
-}
-
-impl Related<super::mux_data::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::MuxData.def()
     }
 }
 

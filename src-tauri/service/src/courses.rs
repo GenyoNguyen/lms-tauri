@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::types::{chrono::Utc, Uuid};
 
+use cloudinary::upload::Upload;
+
 pub struct Courses;
 
 #[derive(FromQueryResult, Debug, Serialize, Deserialize)]
@@ -78,6 +80,22 @@ impl Courses {
                 }
                 "imageUrl" => {
                     if let Some(image_url) = value.as_str() {
+                        match course.image_url.unwrap() {
+                            Some(url) => {
+                                let pid: &str =
+                                    url.split("/").last().unwrap().split(".").next().unwrap();
+
+                                let api_key = env::var("NEXT_PUBLIC_CLOUDINARY_API_KEY")
+                                    .expect("Cannot get Cloudinary api key");
+                                let cloud_name = env::var("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME")
+                                    .expect("Cannot get Cloudinary cloud name");
+                                let api_secret = env::var("CLOUDINARY_API_SECRET")
+                                    .expect("Cannot get Cloudinary api secret");
+                                let upload = Upload::new(api_key, cloud_name, api_secret);
+                                let _ = upload.destroy(pid).await.unwrap();
+                            }
+                            _ => {}
+                        }
                         course.image_url = Set(Some(image_url.to_string()));
                     }
                 }
@@ -88,7 +106,7 @@ impl Courses {
                 }
                 "price" => {
                     if let Some(price) = value.as_i64() {
-                        course.price = Set(Some(price as i64));
+                        course.price = Set(Some(price as i32));
                     }
                 }
                 _ => continue,
@@ -97,6 +115,20 @@ impl Courses {
 
         course.update(db).await?;
         Ok(())
+    }
+
+    pub async fn list(db: &DbConn, user_id: String) -> Result<Vec<course::Model>, DbErr> {
+        println!("Lmao");
+        let courses = Course::find()
+            .filter(course::Column::UserId.eq(user_id))
+            .all(db)
+            .await?;
+
+        for course in courses.iter() {
+            println!("{:?}", course);
+        }
+
+        Ok(courses)
     }
 
     pub async fn add_attachment(
@@ -153,6 +185,25 @@ impl Courses {
             .one(db)
             .await?
             .unwrap();
+
+        let pid: &str = &delete_attachment
+            .url
+            .split("/")
+            .last()
+            .unwrap()
+            .split(".")
+            .next()
+            .unwrap();
+
+        let api_key =
+            env::var("NEXT_PUBLIC_CLOUDINARY_API_KEY").expect("Cannot get Cloudinary api key");
+        let cloud_name = env::var("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME")
+            .expect("Cannot get Cloudinary cloud name");
+        let api_secret =
+            env::var("CLOUDINARY_API_SECRET").expect("Cannot get Cloudinary api secret");
+        let upload = Upload::new(api_key, cloud_name, api_secret);
+        let _ = upload.destroy(pid).await.unwrap();
+
         delete_attachment.delete(db).await?;
 
         let res = Attachment::find()
@@ -163,10 +214,6 @@ impl Courses {
     }
 
     pub async fn delete(db: &DbConn, user_id: String, course_id: String) -> Result<(), DbErr> {
-        let client = reqwest::Client::new();
-        let mux_token_id = env::var("MUX_TOKEN_ID").expect("Cannot get Mux token id");
-        let mux_token_secret = env::var("MUX_TOKEN_SECRET").expect("Cannot get Mux token secret");
-
         let delete_course = Course::find_by_id(course_id.clone())
             .filter(course::Column::UserId.eq(user_id.clone()))
             .one(db)
@@ -177,20 +224,25 @@ impl Courses {
             None => return Err(DbErr::Custom("Cannot find course".into())),
         };
 
-        let mux_data = MuxData::find()
-            .join(JoinType::InnerJoin, mux_data::Relation::Chapter.def())
+        let chapters = Chapter::find()
             .filter(chapter::Column::CourseId.eq(course_id))
             .all(db)
             .await?;
 
-        for data in mux_data.iter() {
-            let _ = client
-                .delete(format!(
-                    "https://api.mux.com/video/v1/assets/{}",
-                    data.asset_id
-                ))
-                .basic_auth(mux_token_id.clone(), Some(mux_token_secret.clone()))
-                .send();
+        for chapter in chapters.iter() {
+            match chapter.video_id.clone() {
+                Some(pid) => {
+                    let api_key = env::var("NEXT_PUBLIC_CLOUDINARY_API_KEY")
+                        .expect("Cannot get Cloudinary api key");
+                    let cloud_name = env::var("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME")
+                        .expect("Cannot get Cloudinary cloud name");
+                    let api_secret = env::var("CLOUDINARY_API_SECRET")
+                        .expect("Cannot get Cloudinary api secret");
+                    let upload = Upload::new(api_key, cloud_name, api_secret);
+                    let _ = upload.destroy(pid).await.unwrap();
+                }
+                _ => {}
+            }
         }
 
         delete_course.delete(db).await?;

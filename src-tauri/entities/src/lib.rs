@@ -6,7 +6,6 @@ pub mod attachment;
 pub mod category;
 pub mod chapter;
 pub mod course;
-pub mod mux_data;
 pub mod purchase;
 pub mod stripe_customer;
 pub mod user_progress;

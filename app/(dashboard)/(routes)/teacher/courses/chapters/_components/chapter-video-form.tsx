@@ -1,27 +1,21 @@
 "use client";
 
-import * as z from "zod";
-import MuxPlayer from "@mux/mux-player-react";
-
 import { Button } from "@/components/ui/button";
-import { Pencil, PlusCircle, Video } from "lucide-react";
+import { Loader2, Pencil, PlusCircle, Video } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Chapter, MuxData } from "@prisma/client";
-import { FileUpload } from "@/components/file-upload";
+import { Chapter } from "@prisma/client";
 import { invoke } from "@tauri-apps/api/core";
 
+import { CldUploadWidget, CldVideoPlayer } from "next-cloudinary";
+import 'next-cloudinary/dist/cld-video-player.css';
+
 interface ChapterVideoFormProps {
-    initialData: Chapter & { muxData?: MuxData | null };
+    initialData: Chapter;
     courseId: string;
     chapterId: string;
 };
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const formSchema = z.object({
-    videoUrl: z.string().min(1),
-})
 
 export const ChapterVideoForm = ({
     initialData,
@@ -30,81 +24,87 @@ export const ChapterVideoForm = ({
 }: ChapterVideoFormProps) => {
     const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
     const [isEditting, setIsEditting] = useState(false);
-    const [videoUrl, setVideoUrl] = useState(initialData?.videoUrl || undefined);
-
-    const toggleEdit = () => setIsEditting((current) => !current);
-
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        console.log(courseId);
-        invoke("update_chapter", {
-            userId,
-            courseId,
-            chapterId,
-            updates: values
-        }).then(() => {
-            toast.success("Chapter updated");
-            toggleEdit();
-            setVideoUrl(values.videoUrl);
-        }).catch(err => toast.error(err));
-    }
+    const [videoId, setVideoId] = useState(initialData?.videoId || undefined);
 
     return (
         <div className="mt-6 border bg-slate-100 rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
                 Chapter Video
-                <Button onClick={toggleEdit} variant="ghost">
-                    {isEditting && (
-                        <>Cancel</>
-                    )}
-                    {!isEditting && !videoUrl && (
-                        <>
-                            <PlusCircle className="h-4 w-4 mr-2"/>
-                            Add a video
-                        </>
-                    )}
-                    {!isEditting && videoUrl && (
-                        <>
-                        <Pencil className="h-4 w-4 mr-2"/>
-                        Edit video
-                        </>
-                    )}
-                </Button>
+
+                <CldUploadWidget
+                    options={{
+                        clientAllowedFormats: ["mp4", "webm", "ogv", "avi", "mov", "flv"]
+                    }}
+                    uploadPreset="ml_default"
+                    onClose={() => {
+                        console.log(videoId)
+                        setIsEditting(false);
+                    }}
+                    onSuccess={(result) => {
+                        invoke("update_chapter", {
+                            userId,
+                            courseId,
+                            chapterId,
+                            updates: { "videoId": result.info.public_id }
+                        }).then(() => {
+                            toast.success("Chapter updated");
+                            setVideoId(result.info.public_id);
+                        }).catch(err => toast.error(err))
+                        .finally(() => setIsEditting(false));
+                    }}
+                    onQueuesEnd={(result, { widget }) => {
+                        widget.close();
+                    }}
+                    >
+                    {({ open }) => {
+                        function handleOnClick() {
+                            setIsEditting(true);
+                            open();
+                        }
+
+                        if (isEditting) {
+                            return (
+                                <Loader2 className="animate-spin w-4 h-4 mr-2" />
+                            )
+                        }
+
+                        return (
+                            <Button onClick={handleOnClick} variant="ghost">
+                                {videoId ? (
+                                    <>
+                                        <Pencil className="h-4 w-4 mr-2"/>
+                                        Edit video
+                                    </>
+                                ) : (
+                                    <>
+                                        <PlusCircle className="h-4 w-4 mr-2"/>
+                                        Add a video
+                                    </>
+                                )}
+                                
+                            </Button>
+                        )
+                    }}
+                </CldUploadWidget>
+
             </div>
             {!isEditting && (
-                !initialData.videoUrl ? (
+                !initialData.videoId ? (
                     <div className="flex items-center justify-center h-60 bg-slate-200 rounded-md">
                         <Video className="h-10 w-10 text-slate-500"/>
                     </div>
                 ) : (
                     <div className="relative aspect-video mt-2">
-                        <MuxPlayer
-                            playbackId={initialData?.muxData?.playbackId || ""}
+                        <CldVideoPlayer
+                            src={videoId!}
                         />
                     </div>
                 )
             )}
             {isEditting && (
-                <div>
-                    <FileUpload
-                        endpoint="chapterVideo"
-                        onChange={(url) => {
-                            console.log(url);
-                            console.log("Lmao");
-                            if (url) {
-                                onSubmit({ videoUrl: url });
-                            }
-                        }}
-                    />
-                    <div className="text-xs text-muted-foreground mt-4">
-                        Upload this chapter&apos;s video
-                    </div>
-                </div>
+                <Loader2 className="h-4 w-4 animate-spin" />
             )}
-            {initialData.videoUrl && !isEditting && (
-                <div className="text-xs text-muted-foreground mt-2">
-                    Videos can take a few minutes to process. Refresh the page if video does not appear.
-                </div>
-            )}
+
         </div>
     )
 }

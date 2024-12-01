@@ -12,7 +12,7 @@ import { ChapterVideoForm } from "./_components/chapter-video-form";
 import { Banner } from "@/components/banner";
 import { ChapterActions } from "./_components/chapter-actions";
 import { useEffect, useState } from "react";
-import { Chapter, MuxData } from "@prisma/client";
+import { Chapter } from "@prisma/client";
 import { invoke } from "@tauri-apps/api/core";
 import toast from "react-hot-toast";
 
@@ -24,12 +24,12 @@ const ChapterIdPage = () => {
     const courseId = searchParams.get("courseId");
     const chapterId = searchParams.get("chapterId");
 
-    const [chapter, setChapter] = useState<{ muxData: MuxData | null } & Chapter>();
+    const [chapter, setChapter] = useState<Chapter>();
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         async function fetchChapter() {
-            invoke<{ muxData: MuxData | null } & Chapter>("get_teacher_chapter", {
+            invoke<Chapter>("get_teacher_chapter", {
                 courseId,
                 chapterId
             }).then(chapter => {
@@ -53,7 +53,7 @@ const ChapterIdPage = () => {
         const requiredFields = [
             chapter.title,
             chapter.description,
-            chapter.videoUrl,
+            chapter.videoId,
         ]
 
         const totalFields = requiredFields.length;

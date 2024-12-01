@@ -15,25 +15,17 @@ pub struct TeacherCourse {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TeacherChapterWithMuxData {
-    #[serde(flatten)]
-    chapter: chapter::Model,
-    mux_data: Option<mux_data::Model>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct TeacherCourseData {
     name: String,
-    total: i64,
+    total: i32,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TeacherAnalytics {
     data: Vec<TeacherCourseData>,
-    total_revenue: i64,
-    total_sales: i64,
+    total_revenue: i32,
+    total_sales: i32,
 }
 
 impl Teacher {
@@ -81,7 +73,7 @@ impl Teacher {
         db: &DbConn,
         course_id: String,
         chapter_id: String,
-    ) -> Result<TeacherChapterWithMuxData, DbErr> {
+    ) -> Result<chapter::Model, DbErr> {
         let chapter = Chapter::find_by_id(chapter_id.clone())
             .filter(chapter::Column::CourseId.eq(course_id.clone()))
             .one(db)
@@ -92,12 +84,7 @@ impl Teacher {
             _ => return Err(DbErr::RecordNotFound("Cannot find chapter".into())),
         };
 
-        let mux_data = MuxData::find()
-            .filter(mux_data::Column::ChapterId.eq(chapter_id.clone()))
-            .one(db)
-            .await?;
-
-        Ok(TeacherChapterWithMuxData { chapter, mux_data })
+        Ok(chapter)
     }
 
     pub async fn analytics(db: &DbConn, user_id: String) -> Result<TeacherAnalytics, DbErr> {
@@ -115,8 +102,8 @@ impl Teacher {
         }
 
         let mut data: Vec<TeacherCourseData> = Vec::new();
-        let mut total_revenue: i64 = 0;
-        let total_sales: i64 = purchases.len() as i64;
+        let mut total_revenue: i32 = 0;
+        let total_sales: i32 = purchases.len() as i32;
 
         for purchase in purchases {
             let course = course::Entity::find_by_id(purchase.course_id.clone())
