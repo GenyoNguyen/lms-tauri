@@ -6,7 +6,7 @@ use serde_json::Value;
 use service::{
     ChapterDetails, Chapters, CourseWithChapters, CourseWithChaptersAndProgress, Courses,
     DashboardCourses, OtherRoutes, ReorderData, SearchCourseWithProgressWithCategory, Teacher,
-    TeacherAnalytics, TeacherChapterWithMuxData, TeacherCourse,
+    TeacherAnalytics, TeacherCourse,
 };
 
 use crate::AppState;
@@ -90,6 +90,19 @@ pub async fn update_course(
         Ok(())
     } else {
         Err("Cannot update course".into())
+    }
+}
+
+#[tauri::command]
+pub async fn list_courses(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+) -> Result<Vec<course::Model>, String> {
+    let db = state.conn.lock().await;
+    if let Ok(courses) = Courses::list(&db, user_id).await {
+        Ok(courses)
+    } else {
+        Err("Cannot list course".into())
     }
 }
 
@@ -215,10 +228,12 @@ pub async fn get_chapter(
     chapter_id: String,
 ) -> Result<ChapterDetails, String> {
     let db = state.conn.lock().await;
-    if let Ok(chapter) = Chapters::get(&db, user_id, course_id, chapter_id).await {
-        Ok(chapter)
-    } else {
-        Err("Cannot get chapter".into())
+    match Chapters::get(&db, user_id, course_id, chapter_id).await {
+        Ok(chapter) => Ok(chapter),
+        Err(DbErr::RecordNotFound(err)) => Err(err),
+        Err(DbErr::AttrNotSet(err)) => Err(err),
+        Err(DbErr::Custom(err)) => Err(err),
+        _ => Err("Cannot get chapter".into()),
     }
 }
 
@@ -352,7 +367,7 @@ pub async fn get_teacher_chapter(
     state: tauri::State<'_, Arc<AppState>>,
     course_id: String,
     chapter_id: String,
-) -> Result<TeacherChapterWithMuxData, String> {
+) -> Result<chapter::Model, String> {
     let db = state.conn.lock().await;
     match Teacher::chapter(&db, course_id, chapter_id).await {
         Ok(coruse) => Ok(coruse),

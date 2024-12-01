@@ -20,7 +20,7 @@ model Course {
   title       String  @db.Text
   description String? @db.Text
   imageUrl    String? @db.Text
-  price       Float?
+  price       Int?
   isPublished Boolean @default(false)
 
   categoryId String?
@@ -60,12 +60,10 @@ model Chapter {
   id          String  @id @default(uuid())
   title       String
   description String? @db.Text
-  videoUrl    String? @db.Text
+  videoId     String? @db.Text
   position    Int
   isPublished Boolean @default(false)
   isFree      Boolean @default(false)
-
-  muxData MuxData?
 
   courseId String
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -76,15 +74,6 @@ model Chapter {
   updatedAt DateTime @updatedAt()
 
   @@index([courseId])
-}
-
-model MuxData {
-  id         String  @id @default(uuid())
-  assetId    String
-  playbackId String?
-
-  chapterId String  @unique
-  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 }
 
 model UserProgress {

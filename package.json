@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^5.7.1",
+    "@cloudinary/react": "^1.13.1",
+    "@cloudinary/url-gen": "^1.21.0",
     "@hello-pangea/dnd": "^17.0.0",
     "@hookform/resolvers": "^3.9.0",
     "@mux/mux-node": "^8.8.0",
@@ -25,6 +27,10 @@
     "@radix-ui/react-progress": "^1.1.0",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
+<<<<<<< HEAD
+=======
+    "@syncfusion/ej2-pdfviewer": "^27.2.3",
+>>>>>>> c7c639cb6604b66eda3c4b82aa4c71540786c63e
     "@tanstack/react-table": "^8.20.5",
     "@tauri-apps/api": "^2.0.3",
     "@tauri-apps/cli-win32-x64-msvc": "^2.0.4",

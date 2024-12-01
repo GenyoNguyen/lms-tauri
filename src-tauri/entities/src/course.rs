@@ -18,7 +18,7 @@ pub struct Model {
     #[sea_orm(column_name = "imageUrl", column_type = "Text", nullable)]
     pub image_url: Option<String>,
     #[sea_orm(column_type = "Double", nullable)]
-    pub price: Option<i64>,
+    pub price: Option<i32>,
     #[sea_orm(column_name = "isPublished", default = false)]
     pub is_published: bool,
     #[sea_orm(column_name = "categoryId", column_type = "Text", nullable)]

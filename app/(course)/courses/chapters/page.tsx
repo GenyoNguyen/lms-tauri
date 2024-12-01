@@ -10,14 +10,14 @@ import { Preview } from "@/components/preview";
 import { File, Loader2 } from "lucide-react";
 import { CourseProgressButton } from "./_components/course-progress-button";
 import { useEffect, useState } from "react";
-import { Attachment, Chapter, Course, MuxData, Purchase, UserProgress } from "@prisma/client";
+import { Attachment, Chapter, Course, Purchase, UserProgress } from "@prisma/client";
 import CourseLayout from "../_components/course-layout";
 import { invoke } from "@tauri-apps/api/core";
+import toast from "react-hot-toast";
 
 interface ChapterDetails {
     chapter: Chapter | null;
     coursePrice: { price: number | null } | null;
-    muxData: MuxData | null;
     attachments: Attachment[] | null;
     nextChapter: Chapter | null,
     userProgress: UserProgress | null,
@@ -56,7 +56,7 @@ const ChapterIdPage = () => {
             }).then(chapter => {
                 setChapterDetails(chapter);
             }).catch(err => {
-                console.log(err);
+                toast.error(err);
             });
 
             invoke<({
@@ -92,7 +92,6 @@ const ChapterIdPage = () => {
         const {
             chapter,
             coursePrice,
-            muxData,
             attachments,
             nextChapter,
             userProgress,
@@ -124,11 +123,10 @@ const ChapterIdPage = () => {
                     <div className="flex flex-col max-w-4xl mx-auto pb-20">
                         <div className="p-4">
                             <VideoPlayer
+                                videoId={chapter.videoId!}
                                 chapterId={params.chapterId}
-                                title={chapter.title}
                                 courseId={params.courseId}
                                 nextChapterId={nextChapter?.id}
-                                playbackId={muxData?.playbackId}
                                 isLocked={isLocked}
                                 completeOnEnd={completeOnEnd}
                             />

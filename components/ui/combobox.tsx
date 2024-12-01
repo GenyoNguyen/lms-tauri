@@ -22,13 +22,13 @@ import {
 interface ComboboxProps {
     options: { label: string; value: string }[];
     value?: string;
-    // onChange: (value: string) => void;
+    onChange(value: string): void;
 };
 
 export const Combobox = ({
     options,
     value,
-    // onChange
+    onChange
 }: ComboboxProps) => {
   const [open, setOpen] = React.useState(false)
 
@@ -58,7 +58,7 @@ export const Combobox = ({
                   key={option.value}
                   value={option.value}
                   onSelect={() => {
-                    // onChange(option.value === value ? "" : option.value)
+                    onChange(option.value === value ? "" : option.value)
                     setOpen(false)
                   }}
                 >

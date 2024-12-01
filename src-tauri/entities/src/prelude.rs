@@ -4,7 +4,6 @@ pub use super::attachment::Entity as Attachment;
 pub use super::category::Entity as Category;
 pub use super::chapter::Entity as Chapter;
 pub use super::course::Entity as Course;
-pub use super::mux_data::Entity as MuxData;
 pub use super::purchase::Entity as Purchase;
 pub use super::stripe_customer::Entity as StripeCustomer;
 pub use super::user_progress::Entity as UserProgress;

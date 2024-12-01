@@ -6,8 +6,14 @@ import { CoursesList } from "@/components/courses-list";
 import { InfoCard } from "./_components/info-card";
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { CourseWithProgressWithCategory } from "@/actions/get-courses";
 import toast from "react-hot-toast";
+import { Category, Course } from "@prisma/client";
+
+type CourseWithProgressWithCategory = Course & {
+    category: Category | null;
+    chapters: { id: string }[];
+    progress: number | null
+};
 
 const SquareLoader = () => {
   return (

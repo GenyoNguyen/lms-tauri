@@ -1,14 +1,21 @@
 "use client";
-import { useState, useEffect } from "react";
-import { redirect, useSearchParams } from "next/navigation";
-import { invoke } from "@tauri-apps/api/core";
-import { Category } from "@prisma/client";
-import toast from "react-hot-toast";
-import { motion } from "framer-motion";
 
 import { Categories } from "./_components/categories";
+
+
+import { redirect, useSearchParams } from "next/navigation";
 import { CoursesList } from "@/components/courses-list";
-import { CourseWithProgressWithCategory } from "@/actions/get-courses";
+import { useState, useEffect } from "react";
+
+import { invoke } from "@tauri-apps/api/core";
+import { Category, Course } from "@prisma/client";
+import toast from "react-hot-toast";
+import { motion } from "framer-motion";
+type CourseWithProgressWithCategory = Course & {
+    category: Category | null;
+    chapters: { id: string }[];
+    progress: number | null
+};
 
 const SquareLoader = () => (
   <motion.div 

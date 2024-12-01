@@ -1,35 +1,31 @@
 "use client";
 
-import MuxPlayer from "@mux/mux-player-react";
-import { useState } from "react";
 import { toast } from "react-hot-toast"
 import { useRouter } from "next/navigation";
-import { Loader2, Lock } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Lock } from "lucide-react";
 import { useConfettiStore } from "@/hooks/use-confetti-store";
 import { invoke } from "@tauri-apps/api/core";
+import { CldVideoPlayer } from "next-cloudinary";
+import 'next-cloudinary/dist/cld-video-player.css';
 
 interface VideoPlayerProps {
-    playbackId: string | null | undefined;
+    videoId: string;
     courseId: string;
     chapterId: string;
     nextChapterId?: string;
     isLocked: boolean;
     completeOnEnd: boolean;
-    title: string;
 };
 
 export const VideoPlayer = ({
-    playbackId,
+    videoId,
     courseId,
     chapterId,
     nextChapterId,
     isLocked,
-    completeOnEnd,
-    title
+    completeOnEnd
 }: VideoPlayerProps) => {
     const userId = "user_2n3IHnfFLi6yuQ5GZrtiNlbuMM2";
-    const [isReady, setIsReady] = useState(false);
     const router = useRouter();
     const confetti = useConfettiStore();
 
@@ -55,11 +51,11 @@ export const VideoPlayer = ({
 
     return (
         <div className="relative aspect-video">
-            {!isReady && !isLocked && (
+            {/* {!isReady && !isLocked && (
                 <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
                     <Loader2 className="h-8 w-8 animate-spin text-secondary" />
                 </div>
-            )}
+            )} */}
             {isLocked &&(
                 <div className="absolute inset-0 flex items-center justify-center bg-slate-800 flex-col gap-y-2 text-secondary">
                     <Lock className="h-8 w-8" />
@@ -69,15 +65,11 @@ export const VideoPlayer = ({
                 </div>
             )}
             {!isLocked && (
-                <MuxPlayer
-                    title={title}
-                    className={cn(
-                        !isReady && "hidden"
-                    )}
-                    onCanPlay={() => setIsReady(true)}
+
+                <CldVideoPlayer
+                    src={videoId!}
                     onEnded={onEnd}
                     autoPlay
-                    playbackId={playbackId ? playbackId : undefined}
                 />
             )}
         </div>
