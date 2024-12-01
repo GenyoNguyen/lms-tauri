@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { BarChart, BotMessageSquare, Compass, Layout, List, BookUser, Presentation} from "lucide-react";
+import { BarChart, BotMessageSquare, Compass, Layout, List, BookUser, Presentation } from "lucide-react";
 import { SidebarItem } from "./sidebar-item";
 import { usePathname } from "next/navigation";
 import './sidebar.css'; // Import CSS
@@ -9,12 +9,12 @@ import './sidebar.css'; // Import CSS
 const guestRoutes = [
     {
         icon: Layout,
-        label: "Dashboard",
+        label: "Bảng điều khiển",
         href: "/"
     },
     {
         icon: Compass,
-        label: "Browse",
+        label: "Thế giới khóa học",
         href: '/search'
     },
     {
@@ -24,12 +24,12 @@ const guestRoutes = [
     },
     {
         icon: BookUser,
-        label: "Instruction",
+        label: "Hướng dẫn",
         href: "/instruction"
     },
     {
         icon: Presentation,
-        label: "WhiteBoard",
+        label: "Bảng trắng",
         href: "/board"
     }, 
     {
@@ -37,18 +37,17 @@ const guestRoutes = [
         label: "PDF",
         href: "/pdf"
     }
-
 ];
 
 const teacherRoutes = [
     {
         icon: List,
-        label: "Courses",
+        label: "Khóa học",
         href: "/teacher/courses"
     },
     {
         icon: BarChart,
-        label: "Analytics",
+        label: "Phân tích",
         href: "/teacher/analytics"
     },
 ];

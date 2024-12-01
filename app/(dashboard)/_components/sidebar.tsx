@@ -33,7 +33,7 @@ export const Sidebar = ({ isDark } : { isDark : boolean }) => {
             `}</style>
 
             <div className={`sidebar-container h-full flex flex-col ${isDark ? 'shadow-md' : 'shadow-sm'}`}>
-                <div className="logo-container p-6 border-b transition-transform duration-300 hover:scale-[1.02]">
+                <div className="logo-container border-b transition-transform duration-300 hover:scale-[1.02]">
                     <Logo isDark = {isDark}  />
                 </div>
 

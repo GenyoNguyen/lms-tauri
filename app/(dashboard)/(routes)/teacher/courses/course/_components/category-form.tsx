@@ -58,7 +58,7 @@ export const CategoryForm = ({
             courseId,
             updates: values
         }).then(() => {
-            toast.success("Course updated");
+            toast.success("Khóa học đã được cập nhật");
             toggleEdit();
             setCategoryId(values.categoryId);
         }).catch(err => toast.error(err));
@@ -69,14 +69,14 @@ export const CategoryForm = ({
     return (
         <div className="mt-6 border bg-slate-100 rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
-                Course Category
+                Danh mục khóa học
                 <Button onClick={toggleEdit} variant="ghost">
                     {isEditting ? (
                         <>Cancel</>
                     ) : (
                         <>
                         <Pencil className="h-4 w-4 mr-2"/>
-                        Edit category
+                        Chỉnh sửa danh mục
                         </>
                     )}
                 </Button>
@@ -86,7 +86,7 @@ export const CategoryForm = ({
                     "text-sm mt-2",
                     !categoryId && "text-slate-500 italic"
                 )}>
-                    {selectedOption?.label || "No category"}
+                    {selectedOption?.label || "Chưa chọn danh mục"}
                 </p>
             )}
             {isEditting && (
@@ -115,7 +115,7 @@ export const CategoryForm = ({
                                 disabled={!isValid || isSubmitting}
                                 type="submit"
                             >
-                                Save
+                                Lưu
                             </Button>
                         </div>
                     </form>

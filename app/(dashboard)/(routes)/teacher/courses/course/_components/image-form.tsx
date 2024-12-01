@@ -36,7 +36,7 @@ export const ImageForm = ({
     return (
         <div className="mt-6 border bg-slate-100 rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
-                Course Image
+                Ảnh nền khóa học
 
                 <CldUploadWidget
                     options={{
@@ -72,7 +72,7 @@ export const ImageForm = ({
                             return (
                                 <Button onClick={handleOnClick} variant="ghost">
                                     <Pencil className="h-4 w-4 mr-2"/>
-                                    Edit image
+                                    Chỉnh sửa hình ảnh
                                 </Button>
                             );
                         }
@@ -80,7 +80,7 @@ export const ImageForm = ({
                         return (
                             <Button onClick={handleOnClick} variant="ghost">
                                 <PlusCircle className="h-4 w-4 mr-2"/>
-                                Add an image
+                                Thêm hình ảnh!
                             </Button>
                         );
                     }}

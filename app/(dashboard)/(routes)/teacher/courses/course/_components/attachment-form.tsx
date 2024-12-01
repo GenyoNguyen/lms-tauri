@@ -54,7 +54,7 @@ export const AttachmentForm = ({
             userId,
             courseId
         }).then((res) => {
-            toast.success("Attachment deleted");
+            toast.success("Thư mục đã được xóa");
             toggleEdit();
             setAttachments(res);
             console.log(attachments);
@@ -67,15 +67,15 @@ export const AttachmentForm = ({
     return (
         <div className="mt-6 border bg-slate-100 rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
-                Course Attachments
+                    Tệp đính kèm khóa học
                 <Button onClick={toggleEdit} variant="ghost">
                     {isEditting && (
-                        <>Cancel</>
+                        <>Hủy bỏ thao tác</>
                     )}
                     {!isEditting && (
                         <>
                             <PlusCircle className="h-4 w-4 mr-2"/>
-                            Add a file
+                            Thêm một file
                         </>
                     )}
                 </Button>
@@ -84,7 +84,7 @@ export const AttachmentForm = ({
                 <>
                     {attachments.length === 0 && (
                         <p className="text-sm mt-2 text-slate-500 italic">
-                            No attachments yet
+                            Chưa có tệp đính kèm nào
                         </p>
                     )}
                     {attachments.length > 0 && (
@@ -123,14 +123,13 @@ export const AttachmentForm = ({
                         endpoint="courseAttachment"
                         onChange={(url) => {
                             console.log(url);
-                            console.log("Lmao");
                             if (url) {
                                 onSubmit({ url: url });
                             }
                         }}
                     />
                     <div className="text-xs text-muted-foreground mt-4">
-                        Add anything your students might need to complete the course.
+                        Thêm bất cứ điều gì học viên của bạn có thể cần để hoàn thành khóa học.
                     </div>
                 </div>
             )}

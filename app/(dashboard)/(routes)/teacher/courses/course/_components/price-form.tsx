@@ -64,14 +64,14 @@ export const PriceForm = ({
     return (
         <div className="mt-6 border bg-slate-100 rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
-                Course Price
+                Giá khóa học
                 <Button onClick={toggleEdit} variant="ghost">
                     {isEditting ? (
                         <>Cancel</>
                     ) : (
                         <>
                         <Pencil className="h-4 w-4 mr-2"/>
-                        Edit price
+                        Chỉnh sửa giá khóa học
                         </>
                     )}
                 </Button>
@@ -81,7 +81,7 @@ export const PriceForm = ({
                     "text-sm mt-2",
                     !price && "text-slate-500 italic"
                 )}>
-                    {price ? formatPrice(price) : "No price"}
+                    {price ? formatPrice(price) : "Chưa có giá"}
                 </p>
             )}
             {isEditting && (
@@ -100,7 +100,7 @@ export const PriceForm = ({
                                             type="number"
                                             step="10000"
                                             disabled={isSubmitting}
-                                            placeholder="Set a price for your course"
+                                            placeholder="Thêm giá cho khóa học"
                                             {...field}
                                         />
                                     </FormControl>
@@ -113,7 +113,7 @@ export const PriceForm = ({
                                 disabled={!isValid || isSubmitting}
                                 type="submit"
                             >
-                                Save
+                                Lưu!
                             </Button>
                         </div>
                     </form>

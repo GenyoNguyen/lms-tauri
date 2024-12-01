@@ -8,7 +8,6 @@ import {
   ZoomIn,
   ZoomOut,
   Copy,
-  Download,
   Trash2,
   X,
   Eye
@@ -291,7 +290,7 @@ const PdfViewer: React.FC = () => {
             </div>
             <div className="flex items-center space-x-3">
               <button
-                onClick={() => setScale(scale => Math.max(scale - 0.05, 0.5))}
+                onClick={() => setScale(scale => Math.max(scale - 0.05, 0.1))}
                 className="p-2 disabled:opacity-50"
                 disabled={scale === 0.5}
               >
@@ -306,26 +305,6 @@ const PdfViewer: React.FC = () => {
               </button>
             </div>
             <div className="flex space-x-2">
-              <button
-                onClick={() => window.print()}
-                className="p-2 hover:bg-teal-300 rounded-md"
-              >
-                <Download />
-              </button>
-              <button
-                onClick={() => {
-                  if (canvasRef.current) {
-                    const url = canvasRef.current.toDataURL();
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = fileName || 'pdf-capture.png';
-                    link.click();
-                  }
-                }}
-                className="p-2 hover:bg-teal-300 rounded-md"
-              >
-                <Download />
-              </button>
               <button
                 onClick={() => setShowHistory(!showHistory)}
                 className="p-2 hover:bg-teal-300 rounded-md"

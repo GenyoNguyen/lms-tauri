@@ -24,7 +24,7 @@ export const columns: ColumnDef<Course>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Title
+          Tên
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
@@ -38,7 +38,7 @@ export const columns: ColumnDef<Course>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Price
+          Thành Tiền:
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
@@ -61,7 +61,7 @@ export const columns: ColumnDef<Course>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Published
+          Đã Xuất Bản
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
@@ -74,7 +74,7 @@ export const columns: ColumnDef<Course>[] = [
                 "bg-slate-500",
                 isPublished && "bg-sky-700"
             )}>
-                {isPublished ? "Published" : "Draft"}
+                {isPublished ? "Đã xuất bản" : "Bản nháp"}
             </Badge>
         )
     }
@@ -88,7 +88,7 @@ export const columns: ColumnDef<Course>[] = [
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-4 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
+                        <span className="sr-only">Mở Menu</span>
                         <MoreHorizontal className="h-4 w-4" />
                     </Button>
                 </DropdownMenuTrigger>
@@ -96,7 +96,7 @@ export const columns: ColumnDef<Course>[] = [
                     <Link href={`/teacher/courses/course?courseId=${id}`}>
                         <DropdownMenuItem>
                             <Pencil className="h-4 w-4 mr-2" />
-                            Edit
+                            Chỉnh sửa
                         </DropdownMenuItem>
                     </Link>
                 </DropdownMenuContent>

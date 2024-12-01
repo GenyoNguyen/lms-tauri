@@ -4,10 +4,10 @@ export const Logo = ({ isDark }: { isDark: boolean }) => {
     return (
         <Image
             className="w-full items-center"
-            height={130}
-            width={130}
+            height={80}
+            width={80}
             alt="logo"
-            src={isDark ? "/logo_dark.svg" : "/logo.svg"} // Logo dark mode
+            src={isDark ? "/logo_dark_new.svg" : "/logo.svg"} // Logo dark mode
         />
     );
 }

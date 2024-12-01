@@ -34,7 +34,7 @@ export const Actions = ({
                 userId,
                 courseId
             }).then(() => {
-                toast.success("Course unpublished");
+                toast.success("khóa học chưa được xuất bản");
                 setIsCurrentlyPublished(false);
             }).catch(err => toast.error(err))
             .finally(() => setIsLoading(false));
@@ -43,7 +43,7 @@ export const Actions = ({
                 userId,
                 courseId
             }).then(() => {
-                toast.success("Course published");
+                toast.success("Khóa học đã được xuất bản");
                 setIsCurrentlyPublished(true);
                 confetti.onOpen();
             }).catch(err => toast.error(err))
@@ -59,7 +59,7 @@ export const Actions = ({
             userId,
             courseId,
         }).then(() => {
-            toast.success("Course deleted");
+            toast.success("Khóa học đã bị xóa!");
             router.push(`/teacher/courses`);
             router.refresh();
             setIsLoading(false);
@@ -74,7 +74,7 @@ export const Actions = ({
                 variant="outline"
                 size="sm"
             >
-                {isCurrentlyPublished ? "Unpublish" : "Publish"}
+                {isCurrentlyPublished ? "Chưa được xuất bản" : "Xuất bản khóa học"}
             </Button>
             <ConfirmModal onConfirm={onDelete}>
                 <Button size="sm" disabled={isLoading}>

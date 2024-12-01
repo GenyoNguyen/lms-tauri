@@ -13,7 +13,7 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
@@ -22,7 +22,7 @@ import { Course } from "@prisma/client";
 
 const formSchema = z.object({
     title: z.string().min(1, {
-        message: "Title is required",
+        message: "Tên khóa học là bắt buộc",
     }),
 });
 
@@ -44,19 +44,19 @@ const CreatePage = () => {
             title: values.title
         }).then(response => {
             router.push(`/teacher/courses/course/?courseId=${response.id}`);
-            toast.success("Course created!");
+            toast.success("Khóa học đã được tạo!");
             router.refresh();
         }).catch(err => toast.error(err));
-    }
+    };
 
-    return ( 
+    return (
         <div className="max-w-5xl mx-auto flex md:items-center md:justify-center h-full p-6">
             <div>
                 <h1 className="text-2xl">
-                    Name your course
+                    Đặt tên cho khóa học của bạn
                 </h1>
                 <p className="text-sm text-slate-600">
-                    What would you like to name your course? Don&apos;t worry, you can change this later.
+                    Bạn muốn đặt tên khóa học của mình như thế nào? Đừng lo, bạn có thể thay đổi sau.
                 </p>
                 <Form {...form}>
                     <form 
@@ -69,17 +69,17 @@ const CreatePage = () => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>
-                                        Course title
+                                        Tên khóa học
                                     </FormLabel>
                                     <FormControl>
                                         <Input
                                             disabled={isSubmitting}
-                                            placeholder="e.g. 'Advanced web development'"
+                                            placeholder="ví dụ: 'Phát triển web nâng cao'"
                                             {...field}
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        What will you teach in this course?
+                                        Bạn sẽ dạy gì trong khóa học này?
                                     </FormDescription>
                                     <FormMessage/>
                                 </FormItem>
@@ -91,21 +91,21 @@ const CreatePage = () => {
                                     type="button"
                                     variant="ghost"
                                 >
-                                    Cancel
+                                    Hủy
                                 </Button>
                             </Link>
                             <Button
                                 type="submit"
                                 disabled={!isValid || isSubmitting}
                             >
-                                Continue
+                                Tiếp tục
                             </Button>
                         </div>
                     </form>
                 </Form>
             </div>
         </div>
-     );
-}
- 
+    );
+};
+
 export default CreatePage;

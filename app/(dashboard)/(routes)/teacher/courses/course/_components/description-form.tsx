@@ -65,14 +65,14 @@ export const DescriptionForm = ({
     return (
         <div className="mt-6 border bg-slate-100 rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
-                Course Description
+                Mô tả khóa học
                 <Button onClick={toggleEdit} variant="ghost">
                     {isEditting ? (
-                        <>Cancel</>
+                        <>Hủy bỏ thao tác</>
                     ) : (
                         <>
                         <Pencil className="h-4 w-4 mr-2"/>
-                        Edit description
+                        Chỉnh sửa mô tả
                         </>
                     )}
                 </Button>
@@ -82,7 +82,7 @@ export const DescriptionForm = ({
                     "text-sm mt-2",
                     !description && "text-slate-500 italic"
                 )}>
-                    {description || "No description"}
+                    {description || "Chưa có mô tả nào"}
                 </p>
             )}
             {isEditting && (
@@ -99,7 +99,7 @@ export const DescriptionForm = ({
                                     <FormControl>
                                         <Textarea
                                             disabled={isSubmitting}
-                                            placeholder="e.g. 'This course is about...'"
+                                            placeholder="Khóa học này sẽ giúp bạn..."
                                             {...field}
                                         />
                                     </FormControl>
@@ -112,7 +112,7 @@ export const DescriptionForm = ({
                                 disabled={!isValid || isSubmitting}
                                 type="submit"
                             >
-                                Save
+                                Lưu!
                             </Button>
                         </div>
                     </form>

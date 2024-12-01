@@ -4,8 +4,8 @@ use std::sync::Arc;
 use tauri::State;
 use tokio::sync::Mutex;
 
-use dotenv::dotenv;
 use std::env;
+use dotenv::dotenv;
 mod loader;
 mod textgen;
 
@@ -24,10 +24,10 @@ const MAX_HISTORY: usize = 20; // Giới hạn lịch sử hội thoại
 
 // Cấu trúc AppState
 pub struct AppState {
-    pub textgen: Mutex<Option<textgen::TextGeneration>>, // Chứa mô hình nếu đã tải
-    pub history: Mutex<VecDeque<(String, String)>>,      // Lịch sử hội thoại
+    pub textgen: Mutex<Option<textgen::TextGeneration>>,  // Chứa mô hình nếu đã tải
+    pub history: Mutex<VecDeque<(String, String)>>, // Lịch sử hội thoại
     pub conn: Mutex<DatabaseConnection>,
-    pub model_loaded: Mutex<bool>, // Đánh dấu mô hình đã tải
+    pub model_loaded: Mutex<bool>,  // Đánh dấu mô hình đã tải
 }
 
 // Hàm định dạng prompt với CHAT_TEMPLATE và history
@@ -44,18 +44,13 @@ fn format_prompt(new_prompt: &str, history: &VecDeque<(String, String)>, is_chat
     // Format chuỗi dựa trên kiểu trò chuyện hay truy vấn PDF
     if is_chat {
         // Trò chuyện: Sử dụng CHAT_TEMPLATE_CHAT_BOT
-        format!(
-            "{} {} [INST] {} [/INST]",
-            CHAT_TEMPLATE_CHAT_BOT, history_str, new_prompt
-        )
+        format!("{} {} [INST] {} [/INST]", CHAT_TEMPLATE_CHAT_BOT, history_str, new_prompt)
     } else {
         // Truy vấn PDF: Sử dụng CHAT_TEMPLATE_PDF
-        format!(
-            "{} {} [INST] {} [/INST]",
-            CHAT_TEMPLATE_PDF, history_str, new_prompt
-        )
+        format!("{} {} [INST] {} [/INST]", CHAT_TEMPLATE_PDF, history_str, new_prompt)
     }
 }
+
 
 #[tauri::command]
 async fn generate_text(
@@ -85,7 +80,7 @@ async fn generate_text(
             Some(0.1),
             Some(0.5),
             None,
-            1.2,
+            1.0,
             64,
         );
 
@@ -99,12 +94,7 @@ async fn generate_text(
     }
 
     // Lấy đối tượng TextGeneration đã tải
-    let textgen = state
-        .textgen
-        .lock()
-        .await
-        .as_mut()
-        .ok_or("Model not loaded")?;
+    let textgen = state.textgen.lock().await.as_mut().ok_or("Model not loaded")?;
 
     // Acquire history lock
     let mut history = state.history.lock().await;
@@ -172,6 +162,7 @@ async fn generate_text(
     }
 }
 
+
 // Lệnh để xóa lịch sử hội thoại
 #[tauri::command]
 async fn clear_history(state: State<'_, Arc<AppState>>) -> Result<(), String> {
@@ -204,7 +195,6 @@ pub async fn run() {
     });
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_upload::init())
         .manage(state)
         .invoke_handler(tauri::generate_handler![
             greet,
@@ -233,9 +223,8 @@ pub async fn run() {
             create_chapter,
             update_chapter,
             get_teacher_course,
-            get_teacher_chapter,
-            get_teacher_analytics
-        ]) // Đăng ký lệnh clear_history
+            get_teacher_chapter
+        ]) 
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(

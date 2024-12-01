@@ -58,7 +58,7 @@ data,
         <div>
             <div className="flex items-center py-4 justify-between">
                 <Input
-                placeholder="Filter courses..."
+                placeholder="Tìm khóa học ở đây..."
                 value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
                 onChange={(event) =>
                     table.getColumn("title")?.setFilterValue(event.target.value)
@@ -68,7 +68,7 @@ data,
                 <Link href="/teacher/create">
                     <Button>
                         <PlusCircle className="h-4 w-4 mr-2" />
-                        New Course
+                        Khóa Học Mới
                     </Button>
                 </Link>
             </div>
@@ -109,7 +109,7 @@ data,
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No results.
+                                    Không tìm thấy kết quả tương ứng.
                                 </TableCell>
                             </TableRow>
                         )}
@@ -123,7 +123,7 @@ data,
                     onClick={() => table.previousPage()}
                     disabled={!table.getCanPreviousPage()}
                 >
-                    Previous
+                    Trước
                 </Button>
                 <Button
                     variant="outline"
@@ -131,7 +131,7 @@ data,
                     onClick={() => table.nextPage()}
                     disabled={!table.getCanNextPage()}
                 >
-                    Next
+                    Sau
                 </Button>
             </div>
         </div>

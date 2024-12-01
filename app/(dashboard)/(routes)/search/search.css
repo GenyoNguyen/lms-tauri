@@ -1,0 +1,70 @@
+@keyframes square-animation {
+    0% { left: 0; top: 0; }
+    10.5% { left: 0; top: 0; }
+    12.5% { left: 32px; top: 0; }
+    23% { left: 32px; top: 0; }
+    25% { left: 64px; top: 0; }
+    35.5% { left: 64px; top: 0; }
+    37.5% { left: 64px; top: 32px; }
+    48% { left: 64px; top: 32px; }
+    50% { left: 32px; top: 32px; }
+    60.5% { left: 32px; top: 32px; }
+    62.5% { left: 32px; top: 64px; }
+    73% { left: 32px; top: 64px; }
+    75% { left: 0; top: 64px; }
+    85.5% { left: 0; top: 64px; }
+    87.5% { left: 0; top: 32px; }
+    98% { left: 0; top: 32px; }
+    100% { left: 0; top: 0; }
+  }
+  
+  .loader {
+    position: relative;
+    width: 256px;
+    height: 256px;
+    transform: rotate(45deg);
+  }
+  
+  .loader-square {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 28px;
+    height: 28px;
+    margin: 2px;
+    border-radius: 0px;
+    background: black;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    animation: square-animation 5s ease-in-out infinite both;
+  }
+  
+  .loader-square:nth-of-type(1) { animation-delay: 0s; }
+  .loader-square:nth-of-type(2) { animation-delay: -0.7142857142857143s; }
+  .loader-square:nth-of-type(3) { animation-delay: -1.428571428571429s; }
+  .loader-square:nth-of-type(4) { animation-delay: -2.142857142857143s; }
+  .loader-square:nth-of-type(5) { animation-delay: -2.857142857142857s; }
+  .loader-square:nth-of-type(6) { animation-delay: -3.571428571428572s; }
+  .loader-square:nth-of-type(7) { animation-delay: -4.285714285714286s; }
+  .loader-square:nth-of-type(8) { animation-delay: -5s; }
+.bg-gray-50 {
+    background-color: #f7fafc; /* Thay đổi sang màu pastel */
+}
+
+.text-gray-800 {
+    color: #4a5568; /* Có thể thay đổi thành màu pastel nhẹ như #607d8b */
+}
+
+/* Thêm màu pastel cho nền */
+.bg-pastel-blue {
+    background-color: #ffffff; /* Màu xanh pastel nhẹ */
+}
+
+.bg-pastel-green {
+    background-color: #c2e7d9; /* Màu xanh lá pastel */
+}
+
+.text-pastel-dark {
+    color: #6c757d; /* Màu đen pastel nhẹ */
+}
