@@ -1,6 +1,7 @@
 use ::entities::{prelude::*, *};
 use sea_orm::*;
 use serde::{Deserialize, Serialize};
+use sqlx::types::{chrono::Utc, Uuid};
 
 pub struct OtherRoutes;
 
@@ -221,5 +222,34 @@ impl OtherRoutes {
         }
 
         Ok(result)
+    }
+
+    pub async fn checkout(
+        db: &DatabaseConnection,
+        user_id: String,
+        course_id: String,
+    ) -> Result<purchase::Model, DbErr> {
+        let purchase = Purchase::find()
+            .filter(purchase::Column::CourseId.eq(course_id.clone()))
+            .filter(purchase::Column::UserId.eq(user_id.clone()))
+            .one(db)
+            .await?;
+
+        if let Some(_) = purchase {
+            return Err(DbErr::Custom("Already Purchased".to_string()));
+        }
+
+        let new_purchase = purchase::ActiveModel {
+            id: Set(Uuid::new_v4().to_string()),
+            user_id: Set(user_id),
+            course_id: Set(course_id),
+            created_at: Set(Utc::now().naive_utc()),
+            updated_at: Set(Utc::now().naive_utc()),
+            ..Default::default()
+        };
+
+        let new_purchase = new_purchase.insert(db).await?;
+
+        Ok(new_purchase)
     }
 }

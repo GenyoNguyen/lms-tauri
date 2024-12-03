@@ -66,6 +66,20 @@ pub async fn get_search(
 }
 
 #[tauri::command]
+pub async fn course_checkout(
+    state: tauri::State<'_, Arc<AppState>>,
+    user_id: String,
+    course_id: String,
+) -> Result<purchase::Model, String> {
+    let db = state.conn.lock().await;
+    match OtherRoutes::checkout(&db, user_id, course_id).await {
+        Ok(purchase) => Ok(purchase),
+        Err(DbErr::Custom(err)) => Err(err),
+        _ => Err("Cannot purchase course".into()),
+    }
+}
+
+#[tauri::command]
 pub async fn create_course(
     state: tauri::State<'_, Arc<AppState>>,
     user_id: String,
