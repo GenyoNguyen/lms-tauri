@@ -1,25 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Upload, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, Upload, Volume2, VolumeX, List, Music } from 'lucide-react';
 
 const MusicPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(0.5);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const [selectedTrackIndex, setSelectedTrackIndex] = useState(0);
+  const [showPlaylist, setShowPlaylist] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
 
-  // Predefined playlist (you can replace these with actual paths)
+  // Mở rộng danh sách phát mặc định
   const DEFAULT_PLAYLIST = [
-    'audio.mp3'
+    { title: 'Forest Lullaby', path: 'Forest Lullaby.mp3' },
+    { title: 'Just Relax', path: 'Just Relax.mp3' },
+    { title: 'Morning Chill', path: 'Morning Chill.mp3' },
+    { title: 'Perfect Beauty', path: 'Perfect Beauty.mp3' },
+    { title: 'The Beat Of Nature', path: 'The Beat Of Nature.mp3' }
   ];
 
   const togglePlay = () => {
     if (audioRef.current) {
       if (isPlaying) {
-        audioRef.current.pause();}
-        else {
-          audioRef.current.play();
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
       }
       setIsPlaying(!isPlaying);
     }
@@ -39,6 +46,12 @@ const MusicPlayer = () => {
         setIsPlaying(true);
       }
     }
+  };
+
+  const selectTrack = (index: number) => {
+    setSelectedTrackIndex(index);
+    setAudioSrc(DEFAULT_PLAYLIST[index].path);
+    setShowPlaylist(false);
   };
 
   const handleTimeUpdate = () => {
@@ -69,7 +82,7 @@ const MusicPlayer = () => {
 
   useEffect(() => {
     if (!audioSrc) {
-      setAudioSrc(DEFAULT_PLAYLIST[0]);
+      setAudioSrc(DEFAULT_PLAYLIST[0].path);
     }
   }, []);
 
@@ -86,91 +99,130 @@ const MusicPlayer = () => {
   }, [audioSrc]);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-
-    const handleMouseMove = () => {
+    const handleMouseEnter = () => {
       setIsVisible(true);
-      
-      // Clear previous timer
-      if (timer) {
-        clearTimeout(timer);
-      }
-
-      // Set new timer to hide player after 3 seconds of inactivity
-      timer = setTimeout(() => {
-        setIsVisible(false);
-      }, 500);
     };
 
-    // Add global mouse move listener
-    window.addEventListener('mousemove', handleMouseMove);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      if (timer) {
-        clearTimeout(timer);
-      }
+    const handleMouseLeave = () => {
+      setIsVisible(false);
+      setShowPlaylist(false);
     };
+
+    const container = playerContainerRef.current;
+    if (container) {
+      container.addEventListener('mouseenter', handleMouseEnter);
+      container.addEventListener('mouseleave', handleMouseLeave);
+
+      return () => {
+        container.removeEventListener('mouseenter', handleMouseEnter);
+        container.removeEventListener('mouseleave', handleMouseLeave);
+      };
+    }
   }, []);
 
   return (
     <div 
-      className={`fixed bottom-28 left-28 transform -translate-x-1/2 z-50 
-        bg-teal-100 rounded-2xl shadow-2xl p-4 w-48 border border-gray-300
-        transition-all duration-500 ease-in-out
-        ${isVisible ? 'opacity-100' : 'opacity-20 hover:opacity-100'}`}
+      ref={playerContainerRef}
+      className="fixed bottom-28 left-24 z-50"
     >
-      <audio 
-        ref={audioRef} 
-        onTimeUpdate={handleTimeUpdate}
-      />
-
-      <div className="mb-4">
-        <div 
-          className="w-full h-1 bg-zinc-400 cursor-pointer hover:bg-gray-600 transition-colors"
-          onClick={handleSeek}
-        >
-          <div 
-            className="h-1 bg-yellow-500" 
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
+      {/* Biểu tượng nhạc luôn hiển thị */}
+      <div className="cursor-pointer">
+        <Music 
+          size={32} 
+          className={`text-gray-600 hover:text-gray-900 transition-all duration-300 
+            ${isVisible ? 'opacity-0' : 'opacity-100'}`} 
+        />
       </div>
 
-      <div className="flex items-center space-x-2">
-        <label className="cursor-pointer">
-          <input 
-            type="file" 
-            accept="audio/*" 
-            onChange={handleFileUpload} 
-            className="hidden"
-          />
-          <div className="bg-cyan-200 p-2 rounded-full hover:bg-cyan-700 transition-colors">
-            <Upload size={20} className="text-white" />
-          </div>
-        </label>
+      {/* Player với hiệu ứng mượt mà */}
+      <div 
+        className={`mt-2 bg-teal-100 rounded-2xl shadow-2xl p-4 w-64 border border-gray-300 
+        absolute left-0 bottom-full
+        transition-all duration-500 ease-in-out transform
+        ${isVisible 
+          ? 'opacity-100 translate-y-0 scale-100' 
+          : 'opacity-0 translate-y-4 scale-95 pointer-events-none'}`}
+      >
+        <audio 
+          ref={audioRef} 
+          onTimeUpdate={handleTimeUpdate}
+        />
 
-        <button
-          onClick={togglePlay}
-          className="bg-emerald-200 text-white p-3 rounded-full hover:bg-emerald-800 transition-colors"
-          disabled={!audioSrc}
-        >
-          {isPlaying ? <Pause size={24} /> : <Play size={24} />}
-        </button>
-
-        <div className="flex items-center">
-          {volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
-          <input 
-            type="range" 
-            min="0" 
-            max="1" 
-            step="0.05" 
-            value={volume}
-            onChange={handleVolumeChange}
-            className="ml-2 w-8 h-1 bg-blue-50 rounded-lg appearance-none cursor-pointer"
-          />
+        {/* Hiển thị tên bài hát hiện tại */}
+        <div className="text-center mb-2 text-sm font-semibold">
+          {DEFAULT_PLAYLIST[selectedTrackIndex].title}
         </div>
+
+        <div className="mb-4">
+          <div 
+            className="w-full h-1 bg-zinc-400 cursor-pointer hover:bg-gray-600 transition-colors"
+            onClick={handleSeek}
+          >
+            <div 
+              className="h-1 bg-yellow-500" 
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <label className="cursor-pointer">
+            <input 
+              type="file" 
+              accept="audio/*" 
+              onChange={handleFileUpload} 
+              className="hidden"
+            />
+            <div className="bg-cyan-200 p-2 rounded-full hover:bg-cyan-700 transition-colors">
+              <Upload size={20} className="text-white" />
+            </div>
+          </label>
+
+          <button
+            onClick={togglePlay}
+            className="bg-emerald-200 text-white p-3 rounded-full hover:bg-emerald-800 transition-colors"
+            disabled={!audioSrc}
+          >
+            {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+          </button>
+
+          <div className="flex items-center">
+            {volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            <input 
+              type="range" 
+              min="0" 
+              max="1" 
+              step="0.05" 
+              value={volume}
+              onChange={handleVolumeChange}
+              className="ml-2 w-8 h-1 bg-blue-50 rounded-lg appearance-none cursor-pointer"
+            />
+          </div>
+
+          {/* Nút mở danh sách phát */}
+          <button
+            onClick={() => setShowPlaylist(!showPlaylist)}
+            className="bg-purple-200 p-2 rounded-full hover:bg-purple-700 transition-colors"
+          >
+            <List size={20} />
+          </button>
+        </div>
+
+        {/* Danh sách phát */}
+        {showPlaylist && (
+          <div className="mt-2 max-h-40 overflow-y-auto bg-white rounded-lg shadow-inner">
+            {DEFAULT_PLAYLIST.map((track, index) => (
+              <div 
+                key={index}
+                onClick={() => selectTrack(index)}
+                className={`p-2 cursor-pointer hover:bg-gray-100 
+                  ${selectedTrackIndex === index ? 'bg-blue-100' : ''}`}
+              >
+                {track.title}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

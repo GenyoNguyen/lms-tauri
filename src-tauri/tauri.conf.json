@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "LMS Tauri",
+  "productName": "CAPI",
   "version": "0.1.0",
   "identifier": "tauri.lms.com",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "StudyApp",
+        "title": "CAPI",
         "width": 800,
         "height": 600,
         "resizable": true,
@@ -29,9 +29,11 @@
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
+      "icons/128x128@x2.png",
+      "icons/CAPI.ico"
+    ],
+    "resources": [
+      "../.env/"
     ]
   }
 }
